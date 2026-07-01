@@ -69,7 +69,6 @@ abstract final class AppStrings {
 
   // Profile
   static const String profile = 'Profile';
-  static const String editProfile = 'Edit Profile';
   static const String name = 'Name';
   static const String phone = 'Phone';
   static const String saveChanges = 'Save Changes';

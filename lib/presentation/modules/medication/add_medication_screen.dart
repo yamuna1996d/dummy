@@ -76,7 +76,6 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
               label: 'Save medication',
               isLoading: controller.isSaving.value,
               semanticLabel: 'Save medication',
-              semanticHint: 'Double tap to save',
               onPressed: _save,
             ),
           ),

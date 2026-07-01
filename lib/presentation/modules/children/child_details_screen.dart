@@ -29,6 +29,24 @@ const _monthAbbreviations = [
   'DEC',
 ];
 
+// Full month names for screen-reader labels — the visual chip shows the
+// 3-letter abbreviation ("OCT"), but TalkBack/VoiceOver spelling that out
+// letter-by-letter is much harder to parse than hearing "October".
+const _monthNames = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
 /// CHILD PROFILE SCREEN
 ///
 /// Flow: full profile for one child — health metrics, an allergy banner,
@@ -78,28 +96,7 @@ class ChildDetailsScreen extends StatelessWidget {
           child: const Text(AppStrings.childProfile),
         ),
       ),
-      floatingActionButton: Obx(() {
-        final child = childrenController.selectedChild.value;
-        // Hide the FAB until the child data has loaded; we need child.id
-        // to pre-scope the Add Medication route argument correctly.
-        if (child == null || child.id != childId) {
-          return const SizedBox.shrink();
-        }
-        return Semantics(
-          button: true,
-          label: 'Add medication for ${child.name}',
-          child: FloatingActionButton(
-            // Opens Add Medication with this child pre-selected. Awaiting the
-            // navigation means refreshSilently() runs the moment the user
-            // pops back, so the active-medications section updates immediately.
-            onPressed: () => Get.toNamed(
-              AppRoutes.addMedication,
-              arguments: child.id,
-            )?.then((_) => medicationController.refreshSilently()),
-            child: const Icon(Icons.add),
-          ),
-        );
-      }),
+
       body: Obx(() {
         final child = childrenController.selectedChild.value;
         // Show error or spinner until selectedChild is populated for this id.
@@ -167,8 +164,11 @@ class _ChildProfileBody extends StatelessWidget {
                 trailing: Semantics(
                   button: true,
                   label: AppStrings.viewHistory,
-                  hint: 'Double tap to view full medication history',
                   excludeSemantics: true,
+                  onTap: () => Get.toNamed(
+                    AppRoutes.medications,
+                    arguments: {'childId': child.id, 'childName': child.name},
+                  ),
                   child: TextButton(
                     onPressed: () => Get.toNamed(
                       AppRoutes.medications,
@@ -227,8 +227,6 @@ class _ChildProfileBody extends StatelessWidget {
                 _AppointmentCard(child: child),
                 const SizedBox(height: AppDimensions.spacingLg),
               ],
-              if (child.heightPercentile != null)
-                _GrowthTrackingCard(child: child),
             ],
           ),
         ),
@@ -245,22 +243,32 @@ class _ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Column(
-      children: [
-        Center(
-          child: Stack(
-            children: [
-              InitialsAvatar(
-                name: child.name,
-                radius: AppDimensions.avatarXl / 2,
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: theme.colorScheme.onPrimary,
-                fontSize: theme.textTheme.headlineLarge?.fontSize,
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: ExcludeSemantics(
+    // Combine name + age + gender into a single announcement instead of
+    // two separate stops (name, then the "6 years • Female" badge), so a
+    // screen-reader user hears the whole identity summary at once, right
+    // after the avatar.
+    final headerLabel = StringBuffer(child.name);
+    if (child.age != null) headerLabel.write(', ${child.age} years');
+    if (child.gender != null) headerLabel.write(',gender ${child.gender}');
+
+    return Semantics(
+      label: headerLabel.toString(),
+      excludeSemantics: true,
+      child: Column(
+        children: [
+          Center(
+            child: Stack(
+              children: [
+                InitialsAvatar(
+                  name: child.name,
+                  radius: AppDimensions.avatarXl / 2,
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                  fontSize: theme.textTheme.headlineLarge?.fontSize,
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
@@ -278,31 +286,31 @@ class _ProfileHeader extends StatelessWidget {
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: AppDimensions.spacingMd),
-        Text(
-          child.name,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
+          const SizedBox(height: AppDimensions.spacingMd),
+          Text(
+            child.name,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        if (child.age != null || child.gender != null) ...[
-          const SizedBox(height: AppDimensions.spacingSm),
-          PillBadge(
-            text: [
-              if (child.age != null) '${child.age} years',
-              if (child.gender != null) child.gender!,
-            ].join(' • '),
-            backgroundColor: AppColors.chipTeal,
-            textColor: AppColors.primaryLight,
-            fontSize: 13,
-          ),
+          if (child.age != null || child.gender != null) ...[
+            const SizedBox(height: AppDimensions.spacingSm),
+            PillBadge(
+              text: [
+                if (child.age != null) '${child.age} years',
+                if (child.gender != null) child.gender!,
+              ].join(' • '),
+              backgroundColor: AppColors.chipTeal,
+              textColor: AppColors.primaryLight,
+              fontSize: 13,
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -318,6 +326,7 @@ class _HealthMetricsRow extends StatelessWidget {
         if (child.bloodGroup != null)
           Expanded(
             child: _MetricCard(
+              name: child.name,
               icon: Icons.water_drop_outlined,
               label: 'Blood Group',
               value: child.bloodGroup!,
@@ -328,6 +337,7 @@ class _HealthMetricsRow extends StatelessWidget {
         if (child.weightKg != null)
           Expanded(
             child: _MetricCard(
+              name: child.name,
               icon: Icons.monitor_weight_outlined,
               label: 'Weight',
               value:
@@ -344,18 +354,20 @@ class _MetricCard extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
+    required this.name,
   });
 
   final IconData icon;
   final String label;
   final String value;
+  final String name;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Semantics(
-      label: '$label: $value',
+      label: "$name's $label: $value",
       excludeSemantics: true,
       child: Card(
         margin: EdgeInsets.zero,
@@ -403,7 +415,7 @@ class _AllergyBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       label:
-          'Allergy: ${child.allergyName}${child.allergyNote != null ? ", ${child.allergyNote}" : ""}',
+          '${child.name}s Allergy: ${child.allergyName}${child.allergyNote != null ? ", ${child.allergyNote}" : ""}',
       excludeSemantics: true,
       child: Container(
         padding: const EdgeInsets.all(AppDimensions.paddingMd),
@@ -468,7 +480,7 @@ class _MedicationCard extends StatelessWidget {
 
     return Semantics(
       label:
-          '${medication.name}, ${medication.dosage ?? ""}, ${medication.frequency ?? ""}',
+          'active medication ${medication.name}, dosage: ${medication.dosage ?? ""}, ${medication.frequency ?? ""}',
       excludeSemantics: true,
       child: Card(
         child: Padding(
@@ -528,6 +540,22 @@ class _AppointmentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final date = child.nextAppointmentDate;
+    final title = child.nextAppointmentTitle;
+    final time = child.nextAppointmentTime;
+    final location = child.nextAppointmentLocation;
+    final phone = child.nextAppointmentClinicPhone;
+
+    // Merge the date chip + title + time + location into one combined
+    // announcement, the same way the Dashboard's "Upcoming Visit" card
+    // works — otherwise the date badge reads as two disconnected
+    // fragments ("O-C-T", "12") and the time/location rows have no
+    // context tying them to this appointment.
+    final appointmentLabel = StringBuffer('Upcoming appointment: $title');
+    if (date != null) {
+      appointmentLabel.write(' on ${_monthNames[date.month - 1]} ${date.day}');
+    }
+    if (time != null) appointmentLabel.write(', at $time');
+    if (location != null) appointmentLabel.write(', location $location');
 
     return Card(
       child: Padding(
@@ -535,65 +563,66 @@ class _AppointmentCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (date != null)
-                  Container(
-                    width: 52,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryLight,
-                      borderRadius: BorderRadius.circular(
-                        AppDimensions.radiusMd,
+            Semantics(
+              label: appointmentLabel.toString(),
+              excludeSemantics: true,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (date != null)
+                    Container(
+                      width: 52,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryLight,
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.radiusMd,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            _monthAbbreviations[date.month - 1],
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            '${date.day}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                  const SizedBox(width: AppDimensions.spacingMd),
+                  Expanded(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _monthAbbreviations[date.month - 1],
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          '${date.day}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
+                          title!,
+                          style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        if (time != null)
+                          _IconText(icon: Icons.access_time, text: time),
+                        if (location != null)
+                          _IconText(
+                            icon: Icons.location_on_outlined,
+                            text: location,
+                          ),
                       ],
                     ),
                   ),
-                const SizedBox(width: AppDimensions.spacingMd),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        child.nextAppointmentTitle!,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (child.nextAppointmentTime != null)
-                        _IconText(
-                          icon: Icons.access_time,
-                          text: child.nextAppointmentTime!,
-                        ),
-                      if (child.nextAppointmentLocation != null)
-                        _IconText(
-                          icon: Icons.location_on_outlined,
-                          text: child.nextAppointmentLocation!,
-                        ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: AppDimensions.spacingMd),
             FocusTraversalGroup(
@@ -603,13 +632,24 @@ class _AppointmentCard extends StatelessWidget {
                   Expanded(
                     child: FocusTraversalOrder(
                       order: const NumericFocusOrder(0),
-                      child: FilledButton(
-                        onPressed: () => Get.snackbar(
+                      child: Semantics(
+                        button: true,
+                        label: 'Get directions',
+                        hint: location != null
+                            ? 'Shows directions to $location'
+                            : 'Shows directions to the clinic',
+                        excludeSemantics: true,
+                        onTap: () => Get.snackbar(
                           'Get Directions',
-                          child.nextAppointmentLocation ??
-                              'Location not available',
+                          location ?? 'Location not available',
                         ),
-                        child: const Text('Get Directions'),
+                        child: FilledButton(
+                          onPressed: () => Get.snackbar(
+                            'Get Directions',
+                            location ?? 'Location not available',
+                          ),
+                          child: const Text('Get Directions'),
+                        ),
                       ),
                     ),
                   ),
@@ -617,14 +657,25 @@ class _AppointmentCard extends StatelessWidget {
                   Expanded(
                     child: FocusTraversalOrder(
                       order: const NumericFocusOrder(1),
-                      child: OutlinedButton.icon(
-                        onPressed: () => Get.snackbar(
+                      child: Semantics(
+                        button: true,
+                        label: 'Call clinic',
+                        hint: phone != null
+                            ? 'Calls $phone'
+                            : 'Calls the clinic',
+                        excludeSemantics: true,
+                        onTap: () => Get.snackbar(
                           'Call Clinic',
-                          child.nextAppointmentClinicPhone ??
-                              'Phone number not available',
+                          phone ?? 'Phone number not available',
                         ),
-                        icon: const Icon(Icons.call_outlined, size: 18),
-                        label: const Text('Call Clinic'),
+                        child: OutlinedButton.icon(
+                          onPressed: () => Get.snackbar(
+                            'Call Clinic',
+                            phone ?? 'Phone number not available',
+                          ),
+                          icon: const Icon(Icons.call_outlined, size: 18),
+                          label: const Text('Call Clinic'),
+                        ),
                       ),
                     ),
                   ),
@@ -664,56 +715,6 @@ class _IconText extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _GrowthTrackingCard extends StatelessWidget {
-  const _GrowthTrackingCard({required this.child});
-  final ChildEntity child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label:
-          '${AppStrings.growthTracking}: ${child.name} is in the ${child.heightPercentile}th percentile for height.',
-      excludeSemantics: true,
-      child: Container(
-        padding: const EdgeInsets.all(AppDimensions.paddingMd),
-        decoration: BoxDecoration(
-          color: AppColors.primaryLight,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Growth Tracking',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: AppDimensions.spacingXs),
-                  Text(
-                    '${child.name} is in the ${child.heightPercentile}th percentile for height.',
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(
-              Icons.trending_up,
-              color: Colors.white,
-              size: AppDimensions.iconLg,
-            ),
-          ],
-        ),
       ),
     );
   }

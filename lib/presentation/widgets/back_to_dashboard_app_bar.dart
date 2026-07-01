@@ -24,7 +24,7 @@ class BackToDashboardAppBar extends StatelessWidget
       leading: Semantics(
         button: true,
         label: 'Back',
-        hint: 'Double tap to return to the dashboard',
+        hint: 'Returns to the dashboard',
         child: IconButton(
           icon: Icon(Icons.arrow_back, color: theme.colorScheme.primary),
           onPressed: () => Navigator.of(context).canPop()

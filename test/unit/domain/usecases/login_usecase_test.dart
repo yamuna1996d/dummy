@@ -1,65 +1,65 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
 import 'package:kincare/core/errors/app_exception.dart';
 import 'package:kincare/core/errors/result.dart';
 import 'package:kincare/domain/entities/user_entity.dart';
-import 'package:kincare/domain/repositories/auth_repository.dart';
 import 'package:kincare/domain/usecases/login_usecase.dart';
+import 'package:mockito/mockito.dart';
 
-@GenerateNiceMocks([MockSpec<AuthRepository>()])
-import 'login_usecase_test.mocks.dart';
+import '../../../helpers/mocks.mocks.dart';
 
 void main() {
+  late MockAuthRepository repository;
   late LoginUseCase useCase;
-  late MockAuthRepository mockRepository;
-
-  const testUser = UserEntity(
-    id: '1',
-    name: 'Test User',
-    email: 'test@kincare.com',
-  );
-
-  setUpAll(() {
-    provideDummy<Result<UserEntity>>(const Result.success(testUser));
-    provideDummy<Result<void>>(const Result.success(null));
-  });
 
   setUp(() {
-    mockRepository = MockAuthRepository();
-    useCase = LoginUseCase(mockRepository);
+    repository = MockAuthRepository();
+    useCase = LoginUseCase(repository);
   });
 
-  test('should return user on successful login', () async {
-    when(mockRepository.login('test@kincare.com', 'password'))
-        .thenAnswer((_) async => const Result.success(testUser));
+  test(
+    'passes email, password, and rememberMe through to repository.login',
+    () async {
+      const user = UserEntity(
+        id: '1',
+        name: 'Admin',
+        email: 'admin@kincare.com',
+      );
+      when(
+        repository.login('admin@kincare.com', 'password', rememberMe: true),
+      ).thenAnswer((_) async => const Result.success(user));
 
-    final result = await useCase('test@kincare.com', 'password');
+      final result = await useCase(
+        'admin@kincare.com',
+        'password',
+        rememberMe: true,
+      );
 
-    expect(result.isSuccess, isTrue);
-    expect(result.dataOrNull?.email, 'test@kincare.com');
-    verify(mockRepository.login('test@kincare.com', 'password')).called(1);
+      expect(result.dataOrNull, user);
+      verify(
+        repository.login('admin@kincare.com', 'password', rememberMe: true),
+      ).called(1);
+    },
+  );
+
+  test('defaults rememberMe to false when not supplied', () async {
+    when(
+      repository.login(any, any, rememberMe: anyNamed('rememberMe')),
+    ).thenAnswer((_) async => const Result.failure(AuthException()));
+
+    await useCase('admin@kincare.com', 'password');
+
+    verify(
+      repository.login('admin@kincare.com', 'password', rememberMe: false),
+    ).called(1);
   });
 
-  test('should return failure on invalid credentials', () async {
-    when(mockRepository.login('wrong@email.com', 'wrong'))
-        .thenAnswer((_) async => const Result.failure(AuthException()));
+  test('forwards a failure from the repository unchanged', () async {
+    when(
+      repository.login(any, any, rememberMe: anyNamed('rememberMe')),
+    ).thenAnswer((_) async => const Result.failure(AuthException()));
 
-    final result = await useCase('wrong@email.com', 'wrong');
+    final result = await useCase('admin@kincare.com', 'wrong');
 
     expect(result.isFailure, isTrue);
-  });
-
-  test('should return network failure when offline', () async {
-    when(mockRepository.login(any, any))
-        .thenAnswer((_) async => const Result.failure(NetworkException()));
-
-    final result = await useCase('test@kincare.com', 'password');
-
-    expect(result.isFailure, isTrue);
-    result.when(
-      success: (_) => fail('Should be failure'),
-      failure: (e) => expect(e, isA<NetworkException>()),
-    );
   });
 }

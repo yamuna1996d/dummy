@@ -70,25 +70,53 @@ class _DashboardBody extends StatelessWidget {
           Semantics(
             headingLevel: 1,
             child: Text(
-              'Hello, Sarah',
+              'Hello, John',
               style: theme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          const SizedBox(height: AppDimensions.spacingXs),
-          Text(
-            'Here is what is happening today.',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
+
           const SizedBox(height: AppDimensions.spacingLg),
 
           // Section: TODAY AT A GLANCE
-          const SectionLabel('TODAY AT A GLANCE'),
-          const SizedBox(height: AppDimensions.spacingMd),
-          _GlanceCards(dashboard: dashboard),
+          // Fall back to demo values when the dashboard entity hasn't
+          // loaded yet, so the screen never shows blank/zero counts
+          // during the initial fetch.
+          Builder(
+            builder: (context) {
+              final childCount = dashboard?.totalChildren.toString() ?? '2';
+              final medCount = dashboard?.totalMedications.toString() ?? '3';
+              final visitCount =
+                  dashboard?.upcomingAppointments.toString() ?? '1';
+
+              // The section heading and all three glance cards are read
+              // as one combined stop — "Today at a glance: 2 children
+              // under care, 3 medication doses due, 1 upcoming visit" —
+              // instead of the heading and each card announcing
+              // separately as four disconnected fragments.
+              return Semantics(
+                headingLevel: 2,
+                label:
+                    'Today at a glance: $childCount children under care, '
+                    '$medCount medication doses due, '
+                    '$visitCount upcoming visit${visitCount == '1' ? '' : 's'}',
+                excludeSemantics: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SectionLabel('TODAY AT A GLANCE'),
+                    const SizedBox(height: AppDimensions.spacingMd),
+                    _GlanceCards(
+                      childCount: childCount,
+                      medCount: medCount,
+                      visitCount: visitCount,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
           const SizedBox(height: AppDimensions.spacingXl),
 
           // Section: YOUR CHILDREN
@@ -99,24 +127,12 @@ class _DashboardBody extends StatelessWidget {
               child: Row(
                 children: [
                   FocusTraversalOrder(
-                    order: const NumericFocusOrder(0),
-                    child: Semantics(
-                      button: true,
-                      label: 'Add child',
-                      excludeSemantics: true,
-                      child: TextButton.icon(
-                        onPressed: () => Get.toNamed(AppRoutes.addChild),
-                        icon: Icon(Icons.person_add_outlined, size: 18),
-                        label: Text('Add child'),
-                      ),
-                    ),
-                  ),
-                  FocusTraversalOrder(
                     order: const NumericFocusOrder(1),
                     child: Semantics(
                       button: true,
                       label: 'View all children',
                       excludeSemantics: true,
+                      onTap: () => Get.toNamed(AppRoutes.children),
                       child: TextButton(
                         onPressed: () => Get.toNamed(AppRoutes.children),
                         child: Text('View all'),
@@ -161,17 +177,18 @@ class _DashboardBody extends StatelessWidget {
 }
 
 class _GlanceCards extends StatelessWidget {
-  const _GlanceCards({required this.dashboard});
-  final dynamic dashboard;
+  const _GlanceCards({
+    required this.childCount,
+    required this.medCount,
+    required this.visitCount,
+  });
+
+  final String childCount;
+  final String medCount;
+  final String visitCount;
 
   @override
   Widget build(BuildContext context) {
-    // Fall back to demo values when the dashboard entity hasn't loaded yet,
-    // so the screen never shows blank/zero counts during the initial fetch.
-    final childCount = dashboard?.totalChildren?.toString() ?? '2';
-    final medCount = dashboard?.totalMedications?.toString() ?? '3';
-    final visitCount = dashboard?.upcomingAppointments?.toString() ?? '1';
-
     return Column(
       children: [
         Row(
@@ -298,10 +315,16 @@ class _ChildPreviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    // Reads as "Selected child: <name>, age <age>, medication: <status>"
+    // instead of the terser "<name>, <age>, <status>" — spelling out what
+    // each value means rather than leaving a screen-reader user to infer
+    // it from three bare fragments.
     return Semantics(
       button: true,
-      label: '$name, $age, $status',
+      label: 'Selected child: $name, age $age, medication: $status',
+      hint: "Opens $name's profile",
       excludeSemantics: true,
+      onTap: onTap,
       child: Card(
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(
@@ -351,18 +374,31 @@ class _UpcomingVisitCard extends StatelessWidget {
     // all seed children and surfaces it here. If no child has an appointment,
     // these fields are null and we show a "No upcoming visits" placeholder.
     if (title == null || childName == null) {
-      return const Card(
+      return Card(
         child: Padding(
-          padding: EdgeInsets.all(AppDimensions.paddingMd),
-          child: Text('No upcoming visits'),
+          padding: const EdgeInsets.all(AppDimensions.paddingMd),
+          child: Semantics(
+            label: 'Upcoming visit: no upcoming visits scheduled',
+            excludeSemantics: true,
+            child: const Text('No upcoming visits'),
+          ),
         ),
       );
     }
 
     final dateLabel = [
-      if (date != null) '${date.month}/${date.day}',
+      if (date != null) '${date.day}/${date.month}/${date.year}',
       ?time,
     ].join(' at ');
+
+    // One combined announcement — "Upcoming visit for <child>: <title> on
+    // <date>, at <location>" — instead of the date chip, title, and
+    // location reading as three unrelated, disconnected stops. Without
+    // this, a screen-reader user hears fragments with no indication
+    // they belong to the same appointment.
+    final visitLabel = StringBuffer('Upcoming visit for $childName: $title');
+    if (dateLabel.isNotEmpty) visitLabel.write(', $dateLabel');
+    if (location != null) visitLabel.write(', at $location');
 
     return Card(
       child: Padding(
@@ -370,51 +406,58 @@ class _UpcomingVisitCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
+            Semantics(
+              label: visitLabel.toString(),
+              excludeSemantics: true,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.chipGreen,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          dateLabel,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryLight,
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.calendar_month_outlined,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ],
                   ),
-                  decoration: BoxDecoration(
-                    color: AppColors.chipGreen,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    dateLabel,
-                    style: TextStyle(
-                      fontSize: 12,
+                  const SizedBox(height: AppDimensions.spacingMd),
+                  Text(
+                    "$childName's $title",
+                    style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.primaryLight,
                     ),
                   ),
-                ),
-                ExcludeSemantics(
-                  child: Icon(
-                    Icons.calendar_month_outlined,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppDimensions.spacingMd),
-            Text(
-              "$childName's $title",
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
+                  if (location != null) ...[
+                    const SizedBox(height: AppDimensions.spacingXs),
+                    Text(
+                      location,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-            if (location != null) ...[
-              const SizedBox(height: AppDimensions.spacingXs),
-              Text(
-                location,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
             const SizedBox(height: AppDimensions.spacingMd),
             FocusTraversalGroup(
               policy: OrderedTraversalPolicy(),
@@ -426,7 +469,15 @@ class _UpcomingVisitCard extends StatelessWidget {
                       child: Semantics(
                         button: true,
                         label: 'View details',
+                        hint: "Opens this child's profile",
+                        enabled: childId != null,
                         excludeSemantics: true,
+                        onTap: childId == null
+                            ? null
+                            : () => Get.toNamed(
+                                AppRoutes.childDetails,
+                                arguments: childId,
+                              ),
                         child: OutlinedButton(
                           onPressed: childId == null
                               ? null
@@ -452,6 +503,10 @@ class _UpcomingVisitCard extends StatelessWidget {
                         button: true,
                         label: 'Get directions to $location',
                         excludeSemantics: true,
+                        onTap: () => Get.snackbar(
+                          'Get Directions',
+                          location ?? 'Location not available',
+                        ),
                         child: ElevatedButton(
                           onPressed: () => Get.snackbar(
                             'Get Directions',

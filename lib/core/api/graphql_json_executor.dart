@@ -35,21 +35,27 @@ class GraphQLJsonExecutor {
 
   Future<void> _ensureLoaded() async {
     if (_children != null && _medications != null && _profile != null) return;
-    _medications = await _loadOrSeed(
-      HiveKeys.cachedMedications,
-      'assets/data/medications.json',
-      isList: true,
-    ) as List<Map<String, dynamic>>;
-    _children = await _loadOrSeed(
-      HiveKeys.cachedChildren,
-      'assets/data/children.json',
-      isList: true,
-    ) as List<Map<String, dynamic>>;
-    _profile = await _loadOrSeed(
-      HiveKeys.cachedProfile,
-      'assets/data/profile.json',
-      isList: false,
-    ) as Map<String, dynamic>;
+    _medications =
+        await _loadOrSeed(
+              HiveKeys.cachedMedications,
+              'assets/data/medications.json',
+              isList: true,
+            )
+            as List<Map<String, dynamic>>;
+    _children =
+        await _loadOrSeed(
+              HiveKeys.cachedChildren,
+              'assets/data/children.json',
+              isList: true,
+            )
+            as List<Map<String, dynamic>>;
+    _profile =
+        await _loadOrSeed(
+              HiveKeys.cachedProfile,
+              'assets/data/profile.json',
+              isList: false,
+            )
+            as Map<String, dynamic>;
   }
 
   /// Loads [key] from Hive if present; otherwise reads [assetPath] from the
@@ -77,21 +83,22 @@ class GraphQLJsonExecutor {
   }
 
   Map<String, dynamic> _decodeMap(String json) {
-    return Map<String, dynamic>.from(
-      jsonDecode(json) as Map<dynamic, dynamic>,
-    );
+    return Map<String, dynamic>.from(jsonDecode(json) as Map<dynamic, dynamic>);
   }
 
   // ── Save helpers ─────────────────────────────────────────────────────────────
 
-  Future<void> _saveMedications() async =>
-      _storage.put(HiveKeys.dataBox, HiveKeys.cachedMedications, jsonEncode(_medications));
+  Future<void> _saveMedications() async => _storage.put(
+    HiveKeys.dataBox,
+    HiveKeys.cachedMedications,
+    jsonEncode(_medications),
+  );
 
-  Future<void> _saveChildren() async =>
-      _storage.put(HiveKeys.dataBox, HiveKeys.cachedChildren, jsonEncode(_children));
-
-  Future<void> _saveProfile() async =>
-      _storage.put(HiveKeys.dataBox, HiveKeys.cachedProfile, jsonEncode(_profile));
+  Future<void> _saveChildren() async => _storage.put(
+    HiveKeys.dataBox,
+    HiveKeys.cachedChildren,
+    jsonEncode(_children),
+  );
 
   // ── Public API ───────────────────────────────────────────────────────────────
 
@@ -105,14 +112,7 @@ class GraphQLJsonExecutor {
 
     // ── Profile ──────────────────────────────────────────────────────────────
     if (document == GraphQLQueries.getUser) {
-      return {
-        'user': _matchesId(_profile!, variables['id']) ? _profile : null,
-      };
-    }
-    if (document == GraphQLQueries.updateUser) {
-      _profile!.addAll(_inputOf(variables));
-      await _saveProfile();
-      return {'updateUser': _profile};
+      return {'user': _matchesId(_profile!, variables['id']) ? _profile : null};
     }
 
     // ── Children ─────────────────────────────────────────────────────────────

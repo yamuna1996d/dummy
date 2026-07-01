@@ -3,65 +3,81 @@ import 'package:kincare/data/models/user_model.dart';
 import 'package:kincare/domain/entities/user_entity.dart';
 
 void main() {
-  group('UserModel', () {
-    const testJson = {
-      'id': '1',
-      'name': 'Leanne Graham',
-      'email': 'leanne@example.com',
-      'phone': '1-770-736-8031',
-      'username': 'Bret',
-    };
+  group('UserModel.fromJson', () {
+    test('parses a fully populated JSON map', () {
+      final json = {
+        'id': '1',
+        'name': 'Jane Doe',
+        'email': 'jane@kincare.com',
+        'phone': '555-1234',
+        'avatarUrl': 'https://example.com/a.png',
+        'username': 'jane',
+      };
 
-    test('should create from JSON correctly', () {
-      final model = UserModel.fromJson(testJson);
+      final model = UserModel.fromJson(json);
 
       expect(model.id, '1');
-      expect(model.name, 'Leanne Graham');
-      expect(model.email, 'leanne@example.com');
-      expect(model.phone, '1-770-736-8031');
-      expect(model.username, 'Bret');
+      expect(model.name, 'Jane Doe');
+      expect(model.email, 'jane@kincare.com');
+      expect(model.phone, '555-1234');
+      expect(model.avatarUrl, 'https://example.com/a.png');
+      expect(model.username, 'jane');
     });
 
-    test('should serialize to JSON correctly', () {
-      const model = UserModel(
-        id: '1',
-        name: 'Test',
-        email: 'test@test.com',
-        phone: '123',
-      );
+    test('falls back to empty id/name/email and null optional fields', () {
+      final model = UserModel.fromJson(const {});
 
-      final json = model.toJson();
-
-      expect(json['id'], '1');
-      expect(json['name'], 'Test');
-      expect(json['email'], 'test@test.com');
-      expect(json['phone'], '123');
+      expect(model.id, '');
+      expect(model.name, '');
+      expect(model.email, '');
+      expect(model.phone, isNull);
+      expect(model.avatarUrl, isNull);
+      expect(model.username, isNull);
     });
 
-    test('should create from entity', () {
+    test('coerces a numeric id to a String', () {
+      final model = UserModel.fromJson(const {'id': 7});
+      expect(model.id, '7');
+    });
+  });
+
+  group('UserModel.toJson', () {
+    test('round-trips through toJson/fromJson without losing data', () {
+      final original = UserModel.fromJson({
+        'id': '2',
+        'name': 'John Smith',
+        'email': 'john@kincare.com',
+        'phone': '555-9999',
+      });
+
+      final roundTripped = UserModel.fromJson(original.toJson());
+
+      expect(roundTripped.id, original.id);
+      expect(roundTripped.name, original.name);
+      expect(roundTripped.email, original.email);
+      expect(roundTripped.phone, original.phone);
+    });
+  });
+
+  group('UserModel.fromEntity', () {
+    test('copies every field from a UserEntity', () {
       const entity = UserEntity(
-        id: '2',
-        name: 'Entity User',
-        email: 'entity@test.com',
+        id: '3',
+        name: 'Alex',
+        email: 'alex@kincare.com',
+        phone: '555-0000',
+        avatarUrl: 'https://example.com/alex.png',
+        username: 'alex',
       );
 
       final model = UserModel.fromEntity(entity);
 
-      expect(model.id, '2');
-      expect(model.name, 'Entity User');
-      expect(model.email, 'entity@test.com');
-    });
-
-    test('should handle missing optional fields', () {
-      final model = UserModel.fromJson(const {
-        'id': '1',
-        'name': 'Minimal',
-        'email': 'min@test.com',
-      });
-
-      expect(model.phone, isNull);
-      expect(model.avatarUrl, isNull);
-      expect(model.username, isNull);
+      expect(model.id, entity.id);
+      expect(model.name, entity.name);
+      expect(model.email, entity.email);
+      expect(model.phone, entity.phone);
+      expect(model.avatarUrl, entity.avatarUrl);
+      expect(model.username, entity.username);
     });
   });
 }

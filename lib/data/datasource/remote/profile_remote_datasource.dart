@@ -27,30 +27,4 @@ class ProfileRemoteDatasource {
       failure: (e) => Result.failure(e),
     );
   }
-
-  Future<Result<UserModel>> updateProfile(UserModel user) async {
-    final result = await _graphQLService.mutate(
-      GraphQLQueries.updateUser,
-      variables: {
-        'id': user.id,
-        'input': {
-          'name': user.name,
-          'username': user.username,
-          'email': user.email,
-          'phone': user.phone,
-        },
-      },
-    );
-
-    return result.when(
-      success: (data) {
-        final userData = data['updateUser'] as Map<String, dynamic>?;
-        if (userData == null) {
-          return const Result.failure(ParsingException());
-        }
-        return Result.success(UserModel.fromJson(userData));
-      },
-      failure: (e) => Result.failure(e),
-    );
-  }
 }

@@ -28,7 +28,7 @@ class SummaryCard extends StatelessWidget {
     return Semantics(
       button: onTap != null,
       label: semanticLabel ?? '$title: $value',
-      hint: onTap != null ? 'Double tap to view details' : null,
+      hint: onTap != null ? 'Opens more details' : null,
       child: Card(
         child: InkWell(
           onTap: onTap,

@@ -12,7 +12,6 @@ import 'package:kincare/presentation/modules/medication/medication_list_screen.d
 import 'package:kincare/presentation/modules/medication/add_medication_screen.dart';
 import 'package:kincare/presentation/modules/medication/edit_medication_screen.dart';
 import 'package:kincare/presentation/modules/profile/profile_screen.dart';
-import 'package:kincare/presentation/modules/profile/edit_profile_screen.dart';
 import 'package:kincare/presentation/modules/help/help_screen.dart';
 import 'package:kincare/presentation/modules/about/about_screen.dart';
 import 'app_routes.dart';
@@ -86,13 +85,6 @@ abstract final class AppPages {
       name: AppRoutes.profile,
       page: () => const ProfileScreen(),
       binding: ProfileBinding(),
-      transition: Transition.rightToLeft,
-    ),
-    GetPage(
-      name: AppRoutes.editProfile,
-      page: () => const EditProfileScreen(),
-      // ProfileController is already registered by ProfileBinding on the
-      // parent profile route, so no separate binding is required here.
       transition: Transition.rightToLeft,
     ),
     GetPage(

@@ -31,9 +31,24 @@ class SectionLabel extends StatelessWidget {
 
     if (trailing == null) return text;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [text, trailing!],
+    // Row (RenderFlex) has no semantics boundary of its own — it only
+    // creates a SemanticsNode if something forces it to. Without that,
+    // TalkBack/VoiceOver can end up reading the heading and the trailing
+    // action as a single combined stop instead of two independently
+    // focusable ones (which is why "View all" wasn't announced as a
+    // button and the whole row got selected together).
+    //
+    // `container: true` gives this Row its own semantics boundary, and
+    // `explicitChildNodes: true` tells Flutter not to merge its children
+    // into that boundary node — each child (heading, trailing) keeps its
+    // own node and becomes a separate swipe/focus stop.
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [text, trailing!],
+      ),
     );
   }
 }

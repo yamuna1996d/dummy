@@ -3,79 +3,106 @@ import 'package:kincare/data/models/medication_model.dart';
 import 'package:kincare/domain/entities/medication_entity.dart';
 
 void main() {
-  group('MedicationModel', () {
-    test('should create from GraphQL response', () {
-      final model = MedicationModel.fromGraphQL(const {
+  group('MedicationModel.fromJson', () {
+    test('parses a fully populated JSON map', () {
+      final json = {
         'id': '1',
-        'name': 'Vitamin D',
-        'dosage': '400 IU',
-        'frequency': 'Once daily',
+        'name': 'Amoxicillin',
+        'dosage': '250mg',
+        'frequency': 'Twice daily',
         'isActive': true,
-        'childId': '3',
-        'notes': 'Give with breakfast',
-      });
+        'childId': 'c1',
+        'notes': 'Take with food',
+        'startDate': '2026-01-01T00:00:00.000Z',
+        'endDate': '2026-01-10T00:00:00.000Z',
+      };
+
+      final model = MedicationModel.fromJson(json);
 
       expect(model.id, '1');
-      expect(model.name, 'Vitamin D');
-      expect(model.dosage, '400 IU');
-      expect(model.frequency, 'Once daily');
+      expect(model.name, 'Amoxicillin');
+      expect(model.dosage, '250mg');
+      expect(model.frequency, 'Twice daily');
       expect(model.isActive, isTrue);
-      expect(model.childId, '3');
-      expect(model.notes, 'Give with breakfast');
+      expect(model.childId, 'c1');
+      expect(model.startDate, DateTime.parse('2026-01-01T00:00:00.000Z'));
+      expect(model.endDate, DateTime.parse('2026-01-10T00:00:00.000Z'));
     });
 
-    test('should create from JSON', () {
+    test('defaults isActive to true when absent', () {
+      final model = MedicationModel.fromJson(const {'id': '1', 'name': 'X'});
+      expect(model.isActive, isTrue);
+    });
+
+    test('respects an explicit isActive: false', () {
       final model = MedicationModel.fromJson(const {
+        'id': '1',
+        'name': 'X',
+        'isActive': false,
+      });
+      expect(model.isActive, isFalse);
+    });
+
+    test('falls back to empty id/name and null optional fields', () {
+      final model = MedicationModel.fromJson(const {});
+      expect(model.id, '');
+      expect(model.name, '');
+      expect(model.dosage, isNull);
+      expect(model.startDate, isNull);
+      expect(model.endDate, isNull);
+    });
+
+    test('an unparsable date is dropped instead of throwing', () {
+      final model = MedicationModel.fromJson(const {
+        'id': '1',
+        'name': 'X',
+        'startDate': 'not-a-date',
+      });
+      expect(model.startDate, isNull);
+    });
+  });
+
+  group('MedicationModel.toJson', () {
+    test('round-trips through toJson/fromJson without losing data', () {
+      final original = MedicationModel.fromJson({
         'id': '2',
-        'name': 'Iron',
-        'dosage': '65mg',
-        'frequency': 'Daily',
-        'isActive': true,
+        'name': 'Ibuprofen',
+        'dosage': '100mg',
+        'isActive': false,
+        'startDate': '2026-02-01T00:00:00.000Z',
       });
 
-      expect(model.id, '2');
-      expect(model.name, 'Iron');
-      expect(model.dosage, '65mg');
-      expect(model.frequency, 'Daily');
-      expect(model.isActive, isTrue);
-    });
+      final roundTripped = MedicationModel.fromJson(original.toJson());
 
-    test('should serialize to JSON and back', () {
-      const model = MedicationModel(
+      expect(roundTripped.id, original.id);
+      expect(roundTripped.name, original.name);
+      expect(roundTripped.dosage, original.dosage);
+      expect(roundTripped.isActive, original.isActive);
+      expect(roundTripped.startDate, original.startDate);
+    });
+  });
+
+  group('MedicationModel.fromEntity', () {
+    test('copies every field from a MedicationEntity', () {
+      const entity = MedicationEntity(
         id: '3',
-        name: 'Calcium',
+        name: 'Paracetamol',
         dosage: '500mg',
-        frequency: 'Twice daily',
-        isActive: false,
+        frequency: 'As needed',
+        isActive: true,
+        childId: 'c2',
+        notes: 'For fever',
       );
 
-      final json = model.toJson();
-      final restored = MedicationModel.fromJson(json);
-
-      expect(restored.id, '3');
-      expect(restored.name, 'Calcium');
-      expect(restored.dosage, '500mg');
-      expect(restored.frequency, 'Twice daily');
-      expect(restored.isActive, isFalse);
-    });
-
-    test('should create from entity', () {
-      const entity = MedicationEntity(id: '4', name: 'Aspirin');
       final model = MedicationModel.fromEntity(entity);
 
-      expect(model.id, '4');
-      expect(model.name, 'Aspirin');
-    });
-
-    test('should handle dates in JSON', () {
-      final now = DateTime(2026, 6, 29);
-      final model = MedicationModel.fromJson({
-        'id': '5',
-        'name': 'Antibiotic',
-        'startDate': now.toIso8601String(),
-      });
-
-      expect(model.startDate, now);
+      expect(model.id, entity.id);
+      expect(model.name, entity.name);
+      expect(model.dosage, entity.dosage);
+      expect(model.frequency, entity.frequency);
+      expect(model.isActive, entity.isActive);
+      expect(model.childId, entity.childId);
+      expect(model.notes, entity.notes);
     });
   });
 }

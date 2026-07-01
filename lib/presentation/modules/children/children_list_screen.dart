@@ -175,12 +175,27 @@ class _ChildCard extends StatelessWidget {
     final bloodColor = _bloodTypeColors[index % _bloodTypeColors.length];
     final status = _statusData[index % _statusData.length];
     final age = (index + 3).clamp(3, 8);
+    final isVaccine = status['type'] == 'vaccine';
+
+    // The card's Semantics label previously stopped at name/age/blood
+    // type and excluded everything else beneath it — including the two
+    // status chips, which is the actually useful health info on the
+    // card. Build one complete sentence covering all of it, so a
+    // screen-reader user gets the same information a sighted user sees
+    // at a glance, in a single swipe stop.
+    final secondaryLabel = isVaccine
+        ? '${status['label']}: ${status['value']}. '
+              'Next checkup ${status['checkup']}'
+        : '${status['label']}: ${status['value']}. '
+              'Activity: ${status['activity']}';
+    final cardLabel =
+        '${child.name},age $age years, $bloodType blood type. $secondaryLabel';
 
     return Card(
       margin: const EdgeInsets.only(bottom: AppDimensions.spacingMd),
       child: Semantics(
-        button: true,
-        label: '${child.name}, $age years, $bloodType blood type',
+        label: cardLabel,
+        hint: " double tap to Opens ${child.name}'s full profile",
         excludeSemantics: true,
         child: InkWell(
           borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
@@ -233,7 +248,7 @@ class _ChildCard extends StatelessWidget {
                 // Status chips
                 Row(
                   children: [
-                    if (status['type'] == 'vaccine') ...[
+                    if (isVaccine) ...[
                       Expanded(
                         child: IconValueChip(
                           icon: Icons.check_circle,
@@ -325,7 +340,6 @@ class _PaginationFooter extends StatelessWidget {
                   FocusTraversalOrder(
                     order: const NumericFocusOrder(0),
                     child: Semantics(
-                      button: true,
                       enabled: hasPrev,
                       label: 'Previous page',
                       child: IconButton(
@@ -346,8 +360,10 @@ class _PaginationFooter extends StatelessWidget {
                       order: NumericFocusOrder(i.toDouble()),
                       child: Semantics(
                         button: true,
+                        selected: i == page,
                         label: 'Page $i${i == page ? ", current page" : ""}',
                         excludeSemantics: true,
+                        onTap: i == page ? null : () => controller.goToPage(i),
                         child: GestureDetector(
                           onTap: i == page
                               ? null
@@ -387,7 +403,6 @@ class _PaginationFooter extends StatelessWidget {
                   FocusTraversalOrder(
                     order: NumericFocusOrder((totalPages + 1).toDouble()),
                     child: Semantics(
-                      button: true,
                       enabled: hasNext,
                       label: 'Next page',
                       child: IconButton(

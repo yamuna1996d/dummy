@@ -92,31 +92,6 @@ class AboutScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppDimensions.spacingLg),
-          Semantics(
-            button: true,
-            label: 'View open source licenses',
-            excludeSemantics: true,
-            child: Card(
-              child: ListTile(
-                leading: Icon(
-                  Icons.description_outlined,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                title: Text(AppStrings.openSourceLicenses),
-                trailing: Icon(
-                  Icons.chevron_right,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                onTap: () {
-                  showLicensePage(
-                    context: context,
-                    applicationName: AppStrings.appName,
-                    applicationVersion: AppStrings.appVersion,
-                  );
-                },
-              ),
-            ),
-          ),
           const SizedBox(height: AppDimensions.spacingXl),
           Center(
             child: Text(

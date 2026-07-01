@@ -228,7 +228,6 @@ class LoginScreen extends GetView<AuthController> {
                                       onPressed: controller.login,
                                       isLoading: controller.isLoading.value,
                                       semanticLabel: 'Log in',
-                                      semanticHint: 'Double tap to sign in',
                                     ),
                                   ),
                                 ),

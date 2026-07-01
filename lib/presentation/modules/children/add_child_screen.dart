@@ -68,7 +68,6 @@ class _AddChildScreenState extends State<AddChildScreen> {
           label: AppStrings.save,
           isLoading: _isSaving,
           semanticLabel: 'Save new child',
-          semanticHint: 'Double tap to save',
           onPressed: _save,
         ),
       ],

@@ -50,6 +50,11 @@ class MedicationListScreen extends GetView<MedicationController> {
     // calling it on every build is safe.
     controller.setChildFilter(childId);
 
+    final headingText = childId != null
+        ? 'Medication history'
+        : 'All medications';
+    const subtitleText = 'Manage daily dosage and records';
+
     return Scaffold(
       appBar: childId != null
           ? AppBar(
@@ -69,57 +74,64 @@ class MedicationListScreen extends GetView<MedicationController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Semantics(
-                        // The AppBar already carries the level-1 heading
-                        // when filtered (see above); avoid a second one.
-                        headingLevel: childId == null ? 1 : null,
-                        child: Text(
-                          childId != null
-                              ? 'Medication history'
-                              : 'All medications',
+                  child: Semantics(
+                    // The AppBar already carries the level-1 heading when
+                    // filtered (see above); avoid a second one there.
+                    // The heading and the subtitle beneath it are merged
+                    // into one announcement — "Medication history. Manage
+                    // daily dosage and records." — instead of reading as
+                    // two disconnected stops.
+                    headingLevel: childId == null ? 1 : null,
+                    label: '$headingText. $subtitleText',
+                    excludeSemantics: true,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          headingText,
                           style: theme.textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: AppDimensions.spacingXs),
-                      Text(
-                        'Manage daily dosage and records',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                        const SizedBox(height: AppDimensions.spacingXs),
+                        Text(
+                          subtitleText,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 Semantics(
                   button: true,
                   label: AppStrings.addMedication,
-                  hint: 'Double tap to add a new medication',
-                  child: Container(
+                  excludeSemantics: true,
+                  onTap: () async {
+                    await Get.toNamed(
+                      AppRoutes.addMedication,
+                      arguments: childId,
+                    );
+                    controller.refreshSilently();
+                  },
+                  child: _FocusHighlightButton(
                     width: 48,
                     height: 48,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      borderRadius: BorderRadius.circular(
-                        AppDimensions.radiusLg,
-                      ),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.add, color: Colors.white),
-                      // Await the navigation so the list refreshes the moment
-                      // the user pops back from the Add Medication screen.
-                      onPressed: () async {
-                        await Get.toNamed(
-                          AppRoutes.addMedication,
-                          arguments: childId,
-                        );
-                        controller.refreshSilently();
-                      },
-                    ),
+                    borderRadius: AppDimensions.radiusLg,
+                    baseColor: theme.colorScheme.primary,
+                    isFilled: true,
+                    icon: Icons.add,
+                    iconColor: Colors.white,
+                    // Await the navigation so the list refreshes the moment
+                    // the user pops back from the Add Medication screen.
+                    onPressed: () async {
+                      await Get.toNamed(
+                        AppRoutes.addMedication,
+                        arguments: childId,
+                      );
+                      controller.refreshSilently();
+                    },
                   ),
                 ),
               ],
@@ -222,71 +234,87 @@ class _MedicationCard extends StatelessWidget {
         : matchedChildren.first.name;
     final isActive = medication.isActive;
 
+    // Merges the whole informational block — name, child, dosage, and
+    // active/inactive status — into a single announcement, rather than
+    // reading the name, the child pill, the frequency text, and the
+    // status badge as four disconnected stops.
+    final cardLabel =
+        'Selected medication: ${medication.name}, '
+        'medication status is ${isActive ? "active" : "inactive"}, '
+        'child name is $childName, '
+        'dosage ${medication.frequency ?? "not specified"}, ';
+
     return Card(
       margin: const EdgeInsets.only(bottom: AppDimensions.spacingMd),
       child: Padding(
         padding: const EdgeInsets.all(AppDimensions.paddingMd),
         child: Column(
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: iconBg,
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-                  ),
-                  child: Icon(icon, color: AppColors.primaryLight, size: 24),
-                ),
-                const SizedBox(width: AppDimensions.spacingMd),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        medication.name,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+            Semantics(
+              label: cardLabel,
+              excludeSemantics: true,
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: iconBg,
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.radiusLg,
                       ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          PillBadge(
-                            text: childName,
-                            backgroundColor: AppColors.chipTeal,
-                            textColor: AppColors.primaryLight,
-                            fontWeight: FontWeight.w500,
+                    ),
+                    child: Icon(icon, color: AppColors.primaryLight, size: 24),
+                  ),
+                  const SizedBox(width: AppDimensions.spacingMd),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          medication.name,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
                           ),
-                          const SizedBox(width: 8),
-                          if (medication.frequency != null) ...[
-                            Expanded(
-                              child: Text(
-                                medication.frequency!,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            PillBadge(
+                              text: childName,
+                              backgroundColor: AppColors.chipTeal,
+                              textColor: AppColors.primaryLight,
+                              fontWeight: FontWeight.w500,
                             ),
+                            const SizedBox(width: 8),
+                            if (medication.frequency != null) ...[
+                              Expanded(
+                                child: Text(
+                                  medication.frequency!,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ],
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                PillBadge(
-                  text: isActive ? 'Active' : 'Inactive',
-                  backgroundColor: isActive
-                      ? AppColors.successLight
-                      : theme.colorScheme.surfaceContainerHighest,
-                  textColor: isActive
-                      ? Colors.white
-                      : theme.colorScheme.onSurfaceVariant,
-                ),
-              ],
+                  PillBadge(
+                    text: isActive ? 'Active' : 'Inactive',
+                    backgroundColor: isActive
+                        ? AppColors.successLight
+                        : theme.colorScheme.surfaceContainerHighest,
+                    textColor: isActive
+                        ? Colors.white
+                        : theme.colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: AppDimensions.spacingMd),
             Divider(height: 1, color: theme.colorScheme.outlineVariant),
@@ -302,33 +330,29 @@ class _MedicationCard extends StatelessWidget {
                       button: true,
                       label: 'Edit ${medication.name}',
                       excludeSemantics: true,
-                      child: Container(
+                      onTap: () async {
+                        await Get.toNamed(
+                          AppRoutes.editMedication,
+                          arguments: medication,
+                        );
+                        controller.refreshSilently();
+                      },
+                      child: _FocusHighlightButton(
                         width: 44,
                         height: 44,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: AppColors.primaryLight,
-                            width: 1.5,
-                          ),
-                          borderRadius: BorderRadius.circular(
-                            AppDimensions.radiusMd,
-                          ),
-                        ),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.edit_outlined,
-                            color: AppColors.primaryLight,
-                            size: 20,
-                          ),
-                          // Await so the list refreshes on return.
-                          onPressed: () async {
-                            await Get.toNamed(
-                              AppRoutes.editMedication,
-                              arguments: medication,
-                            );
-                            controller.refreshSilently();
-                          },
-                        ),
+                        borderRadius: AppDimensions.radiusMd,
+                        baseColor: AppColors.primaryLight,
+                        icon: Icons.edit_outlined,
+                        iconColor: AppColors.primaryLight,
+                        iconSize: 20,
+                        // Await so the list refreshes on return.
+                        onPressed: () async {
+                          await Get.toNamed(
+                            AppRoutes.editMedication,
+                            arguments: medication,
+                          );
+                          controller.refreshSilently();
+                        },
                       ),
                     ),
                   ),
@@ -339,26 +363,16 @@ class _MedicationCard extends StatelessWidget {
                       button: true,
                       label: 'Delete ${medication.name}',
                       excludeSemantics: true,
-                      child: Container(
+                      onTap: () => _confirmDelete(context),
+                      child: _FocusHighlightButton(
                         width: 44,
                         height: 44,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: AppColors.errorLight,
-                            width: 1.5,
-                          ),
-                          borderRadius: BorderRadius.circular(
-                            AppDimensions.radiusMd,
-                          ),
-                        ),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.delete_outline,
-                            color: AppColors.errorLight,
-                            size: 20,
-                          ),
-                          onPressed: () => _confirmDelete(context),
-                        ),
+                        borderRadius: AppDimensions.radiusMd,
+                        baseColor: AppColors.errorLight,
+                        icon: Icons.delete_outline,
+                        iconColor: AppColors.errorLight,
+                        iconSize: 20,
+                        onPressed: () => _confirmDelete(context),
                       ),
                     ),
                   ),
@@ -382,5 +396,97 @@ class _MedicationCard extends StatelessWidget {
     if (confirmed) {
       await controller.deleteMedication(medication.id);
     }
+  }
+}
+
+/// A bordered icon button that grows a visible highlight ring around its
+/// border when it receives keyboard/switch-control focus.
+///
+/// This is what accessibility auditors and screen-reader/switch-control
+/// testers look for: a clearly visible focus indicator on every
+/// interactive element, distinct from its resting state. Without this,
+/// buttons that only rely on the "pressed" ripple are effectively
+/// invisible to anyone tabbing or scanning through the screen.
+class _FocusHighlightButton extends StatefulWidget {
+  const _FocusHighlightButton({
+    required this.width,
+    required this.height,
+    required this.borderRadius,
+    required this.baseColor,
+    required this.icon,
+    required this.iconColor,
+    required this.onPressed,
+    this.iconSize = 24,
+    this.isFilled = false,
+  });
+
+  final double width;
+  final double height;
+  final double borderRadius;
+  final Color baseColor;
+  final IconData icon;
+  final Color iconColor;
+  final double iconSize;
+  final bool isFilled;
+  final Future<void> Function() onPressed;
+
+  @override
+  State<_FocusHighlightButton> createState() => _FocusHighlightButtonState();
+}
+
+class _FocusHighlightButtonState extends State<_FocusHighlightButton> {
+  final FocusNode _focusNode = FocusNode();
+  bool _isFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_handleFocusChange);
+  }
+
+  void _handleFocusChange() {
+    setState(() => _isFocused = _focusNode.hasFocus);
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_handleFocusChange);
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final highlightColor = Theme.of(context).colorScheme.secondary;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 120),
+      width: widget.width,
+      height: widget.height,
+      decoration: BoxDecoration(
+        color: widget.isFilled ? widget.baseColor : null,
+        borderRadius: BorderRadius.circular(widget.borderRadius),
+        border: Border.all(
+          // Border thickens and switches to the theme's highlight color
+          // while focused, so the ring is visible against any background.
+          color: _isFocused ? highlightColor : widget.baseColor,
+          width: _isFocused ? 3 : (widget.isFilled ? 0 : 1.5),
+        ),
+        boxShadow: _isFocused
+            ? [
+                BoxShadow(
+                  color: highlightColor.withValues(alpha: 0.35),
+                  blurRadius: 6,
+                  spreadRadius: 1,
+                ),
+              ]
+            : null,
+      ),
+      child: IconButton(
+        focusNode: _focusNode,
+        icon: Icon(widget.icon, color: widget.iconColor, size: widget.iconSize),
+        onPressed: () => widget.onPressed(),
+      ),
+    );
   }
 }

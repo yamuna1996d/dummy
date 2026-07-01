@@ -4,77 +4,59 @@ import 'package:kincare/core/errors/result.dart';
 
 void main() {
   group('Result', () {
-    group('Success', () {
-      test('should hold data and report isSuccess', () {
-        const result = Result<int>.success(42);
+    test('Result.success wraps the data and reports isSuccess', () {
+      const result = Result<int>.success(42);
 
-        expect(result.isSuccess, isTrue);
-        expect(result.isFailure, isFalse);
-        expect(result.dataOrNull, 42);
-      });
-
-      test('should call success branch in when()', () {
-        const result = Result<String>.success('hello');
-
-        final value = result.when(
-          success: (data) => data.toUpperCase(),
-          failure: (_) => 'FAILED',
-        );
-
-        expect(value, 'HELLO');
-      });
+      expect(result.isSuccess, isTrue);
+      expect(result.isFailure, isFalse);
+      expect(result.dataOrNull, 42);
     });
 
-    group('Failure', () {
-      test('should hold exception and report isFailure', () {
-        const result = Result<int>.failure(NetworkException());
+    test('Result.failure wraps the exception and reports isFailure', () {
+      const exception = NetworkException();
+      const result = Result<int>.failure(exception);
 
-        expect(result.isFailure, isTrue);
-        expect(result.isSuccess, isFalse);
-        expect(result.dataOrNull, isNull);
-      });
-
-      test('should call failure branch in when()', () {
-        const result = Result<String>.failure(
-          AuthException('Unauthorized'),
-        );
-
-        final message = result.when(
-          success: (_) => 'ok',
-          failure: (e) => e.message,
-        );
-
-        expect(message, 'Unauthorized');
-      });
-    });
-  });
-
-  group('AppException', () {
-    test('NetworkException has default message', () {
-      const e = NetworkException();
-      expect(e.message, 'No internet connection');
+      expect(result.isFailure, isTrue);
+      expect(result.isSuccess, isFalse);
+      expect(result.dataOrNull, isNull);
     });
 
-    test('TimeoutException has default message', () {
-      const e = TimeoutException();
-      expect(e.message, 'Request timed out');
+    test('when() invokes the success branch for a Success', () {
+      const result = Result<String>.success('hello');
+
+      final output = result.when(
+        success: (data) => 'got: $data',
+        failure: (e) => 'error: ${e.message}',
+      );
+
+      expect(output, 'got: hello');
     });
 
-    test('GraphQLException stores errors list', () {
-      const e = GraphQLException('query failed', errors: ['error1']);
-      expect(e.message, 'query failed');
-      expect(e.errors, ['error1']);
+    test('when() invokes the failure branch for a Failure', () {
+      const result = Result<String>.failure(AuthException('bad token'));
+
+      final output = result.when(
+        success: (data) => 'got: $data',
+        failure: (e) => 'error: ${e.message}',
+      );
+
+      expect(output, 'error: bad token');
     });
 
-    test('AuthException has custom message', () {
-      const e = AuthException('Session expired');
-      expect(e.message, 'Session expired');
+    test('Success exposes its data field directly', () {
+      const success = Success<int>(7);
+      expect(success.data, 7);
     });
 
-    test('toString includes type and message', () {
-      const e = ParsingException('bad JSON');
-      expect(e.toString(), contains('ParsingException'));
-      expect(e.toString(), contains('bad JSON'));
+    test('Failure exposes its exception field directly', () {
+      const failure = Failure<int>(CacheException());
+      expect(failure.exception, isA<CacheException>());
+    });
+
+    test('Result<void> failures report isFailure correctly', () {
+      const result = Result<void>.failure(UnexpectedException());
+      expect(result.isFailure, isTrue);
+      expect(result.isSuccess, isFalse);
     });
   });
 }

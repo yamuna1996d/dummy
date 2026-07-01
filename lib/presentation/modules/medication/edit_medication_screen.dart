@@ -81,7 +81,6 @@ class _EditMedicationScreenState extends State<EditMedicationScreen> {
               label: AppStrings.saveChanges,
               isLoading: controller.isSaving.value,
               semanticLabel: 'Save changes',
-              semanticHint: 'Double tap to save',
               onPressed: () => _save(_medication),
             ),
           ),

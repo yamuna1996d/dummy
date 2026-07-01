@@ -19,19 +19,6 @@ abstract final class GraphQLQueries {
     }
   ''';
 
-  static const String updateUser = r'''
-    mutation UpdateUser($id: ID!, $input: UpdateUserInput!) {
-      updateUser(id: $id, input: $input) {
-        id
-        name
-        username
-        email
-        phone
-        avatarUrl
-      }
-    }
-  ''';
-
   // Children
   static const String getChildren = r'''
     query GetChildren($options: PageQueryOptions) {

@@ -24,7 +24,6 @@ class QuickActionTile extends StatelessWidget {
     return Semantics(
       button: true,
       label: label,
-      hint: 'Double tap to $label',
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),

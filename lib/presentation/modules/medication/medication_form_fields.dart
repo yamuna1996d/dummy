@@ -54,7 +54,6 @@ class MedicationFormFields extends StatelessWidget {
               label: 'Child',
               hint: 'Select a child',
               initialValue: controller.selectedChildId.value,
-              semanticLabel: 'Child',
               items: controller.children
                   .map(
                     (child) => DropdownMenuItem(
@@ -90,12 +89,12 @@ class MedicationFormFields extends StatelessWidget {
             // Guard: only pass initialValue if it exists in the options list.
             // A value that isn't in the list causes a Flutter DropdownButton
             // assertion crash ("exactly one item must match the value").
-            initialValue: MedicationController.frequencyOptions.contains(
-                    controller.selectedFrequency.value,
-                  )
-                  ? controller.selectedFrequency.value
-                  : null,
-            semanticLabel: 'Frequency of medication',
+            initialValue:
+                MedicationController.frequencyOptions.contains(
+                  controller.selectedFrequency.value,
+                )
+                ? controller.selectedFrequency.value
+                : null,
             items: MedicationController.frequencyOptions
                 .map(
                   (option) =>

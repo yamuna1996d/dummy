@@ -49,7 +49,6 @@ class ErrorView extends StatelessWidget {
               Semantics(
                 button: true,
                 label: AppStrings.retry,
-                hint: 'Double tap to retry the failed operation',
                 excludeSemantics: true,
                 child: FilledButton.icon(
                   onPressed: onRetry,
