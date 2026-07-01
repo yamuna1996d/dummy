@@ -1,0 +1,162 @@
+[
+  {
+    "id": "1",
+    "name": "Vitamin D Drops",
+    "dosage": "400 IU",
+    "frequency": "Once daily",
+    "isActive": true,
+    "childId": "1",
+    "notes": "Give with breakfast.",
+    "startDate": "2026-01-05T00:00:00.000Z"
+  },
+  {
+    "id": "2",
+    "name": "Paracetamol Syrup",
+    "dosage": "5ml",
+    "frequency": "As needed",
+    "isActive": true,
+    "childId": "2",
+    "notes": "Do not exceed 4 doses in 24 hours.",
+    "startDate": "2026-02-10T00:00:00.000Z"
+  },
+  {
+    "id": "3",
+    "name": "Salbutamol Inhaler",
+    "dosage": "2 puffs",
+    "frequency": "As needed",
+    "isActive": true,
+    "childId": "3",
+    "notes": "Keep inhaler in school bag.",
+    "startDate": "2026-03-01T00:00:00.000Z"
+  },
+  {
+    "id": "4",
+    "name": "Calcium Chewable",
+    "dosage": "500mg",
+    "frequency": "Twice daily",
+    "isActive": true,
+    "childId": "4",
+    "notes": "Take with milk.",
+    "startDate": "2026-01-20T00:00:00.000Z"
+  },
+  {
+    "id": "5",
+    "name": "Multivitamin Gummies",
+    "dosage": "1 gummy",
+    "frequency": "Once daily",
+    "isActive": true,
+    "childId": "5",
+    "notes": "Give after lunch.",
+    "startDate": "2026-04-12T00:00:00.000Z"
+  },
+  {
+    "id": "6",
+    "name": "Amoxicillin 250mg",
+    "dosage": "250mg",
+    "frequency": "Three times daily",
+    "isActive": false,
+    "childId": "10",
+    "notes": "Completed 7-day course for ear infection.",
+    "startDate": "2026-02-01T00:00:00.000Z"
+  },
+  {
+    "id": "7",
+    "name": "Cetirizine Syrup",
+    "dosage": "2.5ml",
+    "frequency": "At bedtime",
+    "isActive": true,
+    "childId": "16",
+    "notes": "For seasonal pollen allergy.",
+    "startDate": "2026-03-15T00:00:00.000Z"
+  },
+  {
+    "id": "8",
+    "name": "Iron Supplement Drops",
+    "dosage": "0.5ml",
+    "frequency": "Once daily",
+    "isActive": true,
+    "childId": "9",
+    "notes": "Give between meals.",
+    "startDate": "2026-01-28T00:00:00.000Z"
+  },
+  {
+    "id": "9",
+    "name": "Moisturizing Cream",
+    "dosage": "Thin layer",
+    "frequency": "Twice daily",
+    "isActive": true,
+    "childId": "11",
+    "notes": "Apply after bath for eczema.",
+    "startDate": "2026-02-18T00:00:00.000Z"
+  },
+  {
+    "id": "10",
+    "name": "Cough Syrup",
+    "dosage": "5ml",
+    "frequency": "Twice daily",
+    "isActive": false,
+    "childId": "13",
+    "notes": "Completed course after recovering from cold.",
+    "startDate": "2026-01-10T00:00:00.000Z"
+  },
+  {
+    "id": "11",
+    "name": "Lactase Enzyme Chewable",
+    "dosage": "1 tablet",
+    "frequency": "Before meals",
+    "isActive": true,
+    "childId": "4",
+    "notes": "Keep a few tablets in the school bag.",
+    "startDate": "2026-03-05T00:00:00.000Z"
+  },
+  {
+    "id": "12",
+    "name": "Teething Gel",
+    "dosage": "Small amount",
+    "frequency": "As needed",
+    "isActive": true,
+    "childId": "15",
+    "notes": "Apply to gums before naps if fussy.",
+    "startDate": "2026-04-01T00:00:00.000Z"
+  },
+  {
+    "id": "13",
+    "name": "Probiotic Drops",
+    "dosage": "5 drops",
+    "frequency": "Once daily",
+    "isActive": true,
+    "childId": "6",
+    "notes": "Mix with morning feed.",
+    "startDate": "2026-02-22T00:00:00.000Z"
+  },
+  {
+    "id": "14",
+    "name": "Saline Nasal Spray",
+    "dosage": "1-2 sprays",
+    "frequency": "As needed",
+    "isActive": true,
+    "childId": "18",
+    "notes": "Use during congestion.",
+    "startDate": "2026-03-20T00:00:00.000Z"
+  },
+  {
+    "id": "15",
+    "name": "Omega-3 Chewable",
+    "dosage": "1 capsule",
+    "frequency": "Once daily",
+    "isActive": true,
+    "childId": "8",
+    "notes": "Supports focus during chess practice.",
+    "startDate": "2026-01-15T00:00:00.000Z"
+  },
+  {
+    "id": "16",
+    "name": "Antihistamine Tablet",
+    "dosage": "5mg",
+    "frequency": "Once daily",
+    "isActive": false,
+    "childId": "19",
+    "notes": "Used during spring allergy season, now stopped.",
+    "startDate": "2026-03-01T00:00:00.000Z"
+  }
+]
