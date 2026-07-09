@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kincare/app/constants/app_dimensions.dart';
 import 'package:kincare/app/constants/app_strings.dart';
-import 'package:kincare/core/widgets/app_snackbar.dart';
-import 'package:kincare/core/widgets/custom_text_field.dart';
-import 'package:kincare/core/widgets/form_screen_scaffold.dart';
-import 'package:kincare/core/widgets/primary_button.dart';
+
+import '../../widgets/app_snackbar.dart';
+import '../../widgets/custom_text_field.dart';
+import '../../widgets/form_screen_scaffold.dart';
+import '../../widgets/primary_button.dart';
 
 /// ADD CHILD SCREEN
 ///
@@ -50,24 +51,24 @@ class _AddChildScreenState extends State<AddChildScreen> {
           autofocus: true,
           textInputAction: TextInputAction.next,
           prefixIcon: Icons.person,
-          semanticLabel: 'Child name',
+          semanticLabel: AppStrings.childNameSemanticLabel,
           validator: (v) =>
-              v == null || v.trim().isEmpty ? 'Name is required' : null,
+          v == null || v.trim().isEmpty ? AppStrings.nameRequired : null,
         ),
         const SizedBox(height: AppDimensions.spacingMd),
         CustomTextField(
-          label: 'Description',
+          label: AppStrings.description,
           controller: _descriptionController,
           maxLines: 4,
           textInputAction: TextInputAction.done,
           prefixIcon: Icons.notes,
-          semanticLabel: 'Description or notes',
+          semanticLabel: AppStrings.descriptionSemanticLabel,
         ),
         const SizedBox(height: AppDimensions.spacingXl),
         PrimaryButton(
           label: AppStrings.save,
           isLoading: _isSaving,
-          semanticLabel: 'Save new child',
+          semanticLabel: AppStrings.saveNewChild,
           onPressed: _save,
         ),
       ],
@@ -83,6 +84,6 @@ class _AddChildScreenState extends State<AddChildScreen> {
 
     setState(() => _isSaving = false);
     Get.back(result: true);
-    AppSnackbar.success('Child added successfully');
+    AppSnackbar.success(AppStrings.childAddedSuccess);
   }
 }

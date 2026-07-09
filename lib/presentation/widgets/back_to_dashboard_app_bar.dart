@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:kincare/app/constants/app_strings.dart';
 import 'package:kincare/app/routes/app_routes.dart';
 
 /// App bar with a back arrow that pops normally when possible, or returns
@@ -23,8 +24,8 @@ class BackToDashboardAppBar extends StatelessWidget
     return AppBar(
       leading: Semantics(
         button: true,
-        label: 'Back',
-        hint: 'Returns to the dashboard',
+        label: AppStrings.back,
+        hint: AppStrings.backToDashboardHint,
         child: IconButton(
           icon: Icon(Icons.arrow_back, color: theme.colorScheme.primary),
           onPressed: () => Navigator.of(context).canPop()

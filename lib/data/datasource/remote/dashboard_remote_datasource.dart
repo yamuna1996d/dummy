@@ -29,18 +29,12 @@ class DashboardRemoteDatasource {
     );
 
     final childCount = childrenResult.when(
-      success: (data) {
-        final meta = data['children']?['meta'] as Map<String, dynamic>?;
-        return meta?['totalCount'] as int? ?? 0;
-      },
+      success: (response) => response.connectionTotalCount('children'),
       failure: (_) => 0,
     );
 
     final medCount = medicationsResult.when(
-      success: (data) {
-        final meta = data['medications']?['meta'] as Map<String, dynamic>?;
-        return meta?['totalCount'] as int? ?? 0;
-      },
+      success: (response) => response.connectionTotalCount('medications'),
       failure: (_) => 0,
     );
 
@@ -48,11 +42,10 @@ class DashboardRemoteDatasource {
     // the same children payload used for the child count above.
     final now = DateTime.now();
     final upcoming = childrenResult.when(
-      success: (data) {
-        final children = data['children']?['data'] as List<dynamic>? ?? [];
+      success: (response) {
+        final children = response.connectionItems('children') ?? [];
         final withAppointments =
             children
-                .map((e) => e as Map<String, dynamic>)
                 .where(
                   (c) =>
                       c['nextAppointmentDate'] != null &&

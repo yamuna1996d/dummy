@@ -20,13 +20,13 @@ class ConfirmDialog extends StatelessWidget {
 
   /// Shows the dialog and returns true if confirmed, false otherwise.
   static Future<bool> show(
-    BuildContext context, {
-    required String title,
-    required String message,
-    String confirmLabel = AppStrings.confirm,
-    String cancelLabel = AppStrings.cancel,
-    bool isDestructive = false,
-  }) async {
+      BuildContext context, {
+        required String title,
+        required String message,
+        String confirmLabel = AppStrings.confirm,
+        String cancelLabel = AppStrings.cancel,
+        bool isDestructive = false,
+      }) async {
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -52,7 +52,7 @@ class ConfirmDialog extends StatelessWidget {
         Semantics(
           button: true,
           label: cancelLabel,
-          hint: 'Dismisses the dialog',
+          hint: AppStrings.dismissDialogHint,
           excludeSemantics: true,
           child: TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -63,8 +63,8 @@ class ConfirmDialog extends StatelessWidget {
           button: true,
           label: confirmLabel,
           hint: isDestructive
-              ? 'Confirms the destructive action'
-              : 'Confirms the action',
+              ? AppStrings.confirmDestructiveHint
+              : AppStrings.confirmActionHint,
           excludeSemantics: true,
           child: TextButton(
             onPressed: () => Navigator.of(context).pop(true),

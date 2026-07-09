@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:kincare/app/constants/app_dimensions.dart';
 import 'package:kincare/app/constants/app_strings.dart';
 import 'package:kincare/core/accessibility/responsive_helper.dart';
-import 'package:kincare/core/widgets/info_tile.dart';
 import 'package:kincare/presentation/widgets/back_to_dashboard_app_bar.dart';
+
+import '../../widgets/info_tile.dart';
 
 /// ABOUT SCREEN
 ///
@@ -23,7 +24,7 @@ class AboutScreen extends StatelessWidget {
     final padding = ResponsiveHelper.horizontalPadding(context);
 
     return Scaffold(
-      appBar: const BackToDashboardAppBar(title: Text('About')),
+      appBar: const BackToDashboardAppBar(title: Text(AppStrings.about)),
       body: ListView(
         padding: EdgeInsets.symmetric(horizontal: padding),
         children: [
@@ -31,7 +32,7 @@ class AboutScreen extends StatelessWidget {
           Center(
             child: Semantics(
               image: true,
-              label: '${AppStrings.appName} application icon',
+              label: AppStrings.appIconLabel,
               child: Container(
                 width: 72,
                 height: 72,
@@ -78,7 +79,7 @@ class AboutScreen extends StatelessWidget {
                 InfoTile(
                   icon: Icons.flutter_dash,
                   label: AppStrings.flutterVersion,
-                  value: '3.41.7',
+                  value: AppStrings.flutterVersionValue,
                   valueAsTrailing: true,
                 ),
                 Divider(height: 1, color: theme.colorScheme.outlineVariant),
@@ -95,7 +96,7 @@ class AboutScreen extends StatelessWidget {
           const SizedBox(height: AppDimensions.spacingXl),
           Center(
             child: Text(
-              '© 2026 ${AppStrings.developerName}. All rights reserved.',
+              AppStrings.copyrightNotice(AppStrings.developerName),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

@@ -5,16 +5,17 @@ import 'package:kincare/app/constants/app_strings.dart';
 import 'package:kincare/app/routes/app_routes.dart';
 import 'package:kincare/app/theme/app_colors.dart';
 import 'package:kincare/core/accessibility/responsive_helper.dart';
-import 'package:kincare/core/widgets/empty_view.dart';
-import 'package:kincare/core/widgets/error_view.dart';
-import 'package:kincare/core/widgets/icon_value_chip.dart';
-import 'package:kincare/core/widgets/initials_avatar.dart';
-import 'package:kincare/core/widgets/loading_view.dart';
-import 'package:kincare/core/widgets/pill_badge.dart';
 import 'package:kincare/domain/entities/child_entity.dart';
 import 'package:kincare/presentation/controllers/children_controller.dart';
 import 'package:kincare/presentation/widgets/kincare_app_bar.dart';
 import 'package:kincare/presentation/widgets/app_drawer.dart';
+
+import '../../widgets/empty_view.dart';
+import '../../widgets/error_view.dart';
+import '../../widgets/icon_value_chip.dart';
+import '../../widgets/initials_avatar.dart';
+import '../../widgets/loading_view.dart';
+import '../../widgets/pill_badge.dart';
 
 /// CHILDREN LIST SCREEN
 ///
@@ -44,7 +45,7 @@ class ChildrenListScreen extends GetView<ChildrenController> {
             child: Semantics(
               headingLevel: 1,
               child: Text(
-                'Your children',
+                AppStrings.yourChildren,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -129,31 +130,31 @@ const _bloodTypeColors = [
 const _statusData = [
   {
     'type': 'vaccine',
-    'label': 'VACCINES',
+    'label': AppStrings.vaccines,
     'value': 'Up to date',
     'checkup': 'Oct 12',
   },
   {
     'type': 'medication',
-    'label': 'MEDICATION',
+    'label': AppStrings.medication,
     'value': 'Due at 4 PM',
     'activity': 'Napped 1hr',
   },
   {
     'type': 'vaccine',
-    'label': 'VACCINES',
+    'label': AppStrings.vaccines,
     'value': 'Up to date',
     'checkup': 'Nov 5',
   },
   {
     'type': 'medication',
-    'label': 'MEDICATION',
+    'label': AppStrings.medication,
     'value': 'Due at 6 PM',
     'activity': 'Played outside',
   },
   {
     'type': 'vaccine',
-    'label': 'VACCINES',
+    'label': AppStrings.vaccines,
     'value': 'Up to date',
     'checkup': 'Dec 1',
   },
@@ -171,7 +172,7 @@ class _ChildCard extends StatelessWidget {
     // through these arrays spreads different chips across the visible cards.
     // age is derived from index purely for visual variety on the card;
     // the child's real age comes from child_entity.age on the profile screen.
-    final bloodType = _bloodTypes[index % _bloodTypes.length];
+    final bloodTypeValue = _bloodTypes[index % _bloodTypes.length];
     final bloodColor = _bloodTypeColors[index % _bloodTypeColors.length];
     final status = _statusData[index % _statusData.length];
     final age = (index + 3).clamp(3, 8);
@@ -185,20 +186,24 @@ class _ChildCard extends StatelessWidget {
     // at a glance, in a single swipe stop.
     final secondaryLabel = isVaccine
         ? '${status['label']}: ${status['value']}. '
-              'Next checkup ${status['checkup']}'
+        '${AppStrings.nextCheckup} ${status['checkup']}'
         : '${status['label']}: ${status['value']}. '
-              'Activity: ${status['activity']}';
-    final cardLabel =
-        '${child.name},age $age years, $bloodType blood type. $secondaryLabel';
+        '${AppStrings.activity}: ${status['activity']}';
+    final cardLabel = AppStrings.childCardLabel(
+      name: child.name,
+      age: age,
+      bloodType: bloodTypeValue,
+      secondaryLabel: secondaryLabel,
+    );
 
     return Card(
       margin: const EdgeInsets.only(bottom: AppDimensions.spacingMd),
       child: Semantics(
         label: cardLabel,
-        hint: " double tap to Opens ${child.name}'s full profile",
+        hint: AppStrings.childCardHint(child.name),
         excludeSemantics: true,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: () => Get.toNamed(AppRoutes.childDetails, arguments: child.id),
           child: Padding(
             padding: const EdgeInsets.all(AppDimensions.paddingMd),
@@ -222,7 +227,7 @@ class _ChildCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           PillBadge(
-                            text: '$age years',
+                            text: '$age ${AppStrings.years}',
                             border: Border.all(
                               color: theme.colorScheme.outlineVariant,
                             ),
@@ -230,7 +235,7 @@ class _ChildCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           PillBadge(
-                            text: '$bloodType Blood Type',
+                            text: '$bloodTypeValue ${AppStrings.bloodType}',
                             backgroundColor: bloodColor,
                             textColor: AppColors.primaryLight,
                             fontSize: 11,
@@ -263,7 +268,7 @@ class _ChildCard extends StatelessWidget {
                         child: IconValueChip(
                           icon: Icons.calendar_today,
                           iconColor: AppColors.primaryLight,
-                          label: 'NEXT CHECKUP',
+                          label: AppStrings.nextCheckup,
                           value: status['checkup']!,
                           backgroundColor: AppColors.chipTeal,
                         ),
@@ -283,7 +288,7 @@ class _ChildCard extends StatelessWidget {
                         child: IconValueChip(
                           icon: Icons.schedule,
                           iconColor: AppColors.primaryLight,
-                          label: 'ACTIVITY',
+                          label: AppStrings.activity,
                           value: status['activity']!,
                           backgroundColor: AppColors.chipTeal,
                         ),
@@ -325,7 +330,7 @@ class _PaginationFooter extends StatelessWidget {
             Semantics(
               liveRegion: true,
               child: Text(
-                'Showing $start-$end of $totalItems children',
+                AppStrings.paginationStatus(start, end, totalItems),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -341,15 +346,15 @@ class _PaginationFooter extends StatelessWidget {
                     order: const NumericFocusOrder(0),
                     child: Semantics(
                       enabled: hasPrev,
-                      label: 'Previous page',
+                      label: AppStrings.previousPage,
                       child: IconButton(
                         icon: Icon(
                           Icons.chevron_left,
                           color: hasPrev
                               ? theme.colorScheme.onSurface
                               : theme.colorScheme.onSurfaceVariant.withAlpha(
-                                  100,
-                                ),
+                            100,
+                          ),
                         ),
                         onPressed: hasPrev ? controller.previousPage : null,
                       ),
@@ -361,7 +366,7 @@ class _PaginationFooter extends StatelessWidget {
                       child: Semantics(
                         button: true,
                         selected: i == page,
-                        label: 'Page $i${i == page ? ", current page" : ""}',
+                        label: AppStrings.pageLabel(i, isCurrent: i == page),
                         excludeSemantics: true,
                         onTap: i == page ? null : () => controller.goToPage(i),
                         child: GestureDetector(
@@ -404,15 +409,15 @@ class _PaginationFooter extends StatelessWidget {
                     order: NumericFocusOrder((totalPages + 1).toDouble()),
                     child: Semantics(
                       enabled: hasNext,
-                      label: 'Next page',
+                      label: AppStrings.nextPage,
                       child: IconButton(
                         icon: Icon(
                           Icons.chevron_right,
                           color: hasNext
                               ? theme.colorScheme.onSurface
                               : theme.colorScheme.onSurfaceVariant.withAlpha(
-                                  100,
-                                ),
+                            100,
+                          ),
                         ),
                         onPressed: hasNext ? controller.nextPage : null,
                       ),

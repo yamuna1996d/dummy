@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kincare/app/constants/app_dimensions.dart';
 import 'package:kincare/app/constants/app_strings.dart';
-import 'package:kincare/core/widgets/app_snackbar.dart';
-import 'package:kincare/core/widgets/form_screen_scaffold.dart';
-import 'package:kincare/core/widgets/primary_button.dart';
-import 'package:kincare/core/widgets/unsaved_changes_scope.dart';
 import 'package:kincare/domain/entities/medication_entity.dart';
 import 'package:kincare/presentation/controllers/medication_controller.dart';
 import 'package:kincare/presentation/modules/medication/medication_form_fields.dart';
+
+import '../../widgets/app_snackbar.dart';
+import '../../widgets/form_screen_scaffold.dart';
+import '../../widgets/primary_button.dart';
+import '../../widgets/unsaved_changes_scope.dart';
 
 /// EDIT MEDICATION SCREEN
 ///
@@ -61,10 +62,10 @@ class _EditMedicationScreenState extends State<EditMedicationScreen> {
   // Any single field differing from its baseline means the form is dirty.
   bool get _hasUnsavedChanges =>
       controller.nameController.text != _initialName ||
-      controller.dosageController.text != _initialDosage ||
-      controller.notesController.text != _initialNotes ||
-      controller.selectedChildId.value != _initialChildId ||
-      controller.selectedFrequency.value != _initialFrequency;
+          controller.dosageController.text != _initialDosage ||
+          controller.notesController.text != _initialNotes ||
+          controller.selectedChildId.value != _initialChildId ||
+          controller.selectedFrequency.value != _initialFrequency;
 
   @override
   Widget build(BuildContext context) {
@@ -77,10 +78,10 @@ class _EditMedicationScreenState extends State<EditMedicationScreen> {
           MedicationFormFields(controller: controller),
           const SizedBox(height: AppDimensions.spacingXl),
           Obx(
-            () => PrimaryButton(
+                () => PrimaryButton(
               label: AppStrings.saveChanges,
               isLoading: controller.isSaving.value,
-              semanticLabel: 'Save changes',
+              semanticLabel: AppStrings.saveChanges,
               onPressed: () => _save(_medication),
             ),
           ),
@@ -113,7 +114,7 @@ class _EditMedicationScreenState extends State<EditMedicationScreen> {
     final success = await controller.updateMedication(updated);
     if (success) {
       Get.back();
-      AppSnackbar.success('Medication updated successfully');
+      AppSnackbar.success(AppStrings.medicationUpdatedSuccess);
     }
   }
 }

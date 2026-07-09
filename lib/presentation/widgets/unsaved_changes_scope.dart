@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kincare/app/constants/app_strings.dart';
-import 'package:kincare/core/widgets/confirm_dialog.dart';
+
+import 'confirm_dialog.dart';
 
 /// Wraps a form screen so that leaving it — back arrow, system back
 /// gesture/button — while [hasUnsavedChanges] is true shows a "Discard

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:kincare/app/bindings/initial_binding.dart';
-import 'package:kincare/app/constants/app_strings.dart';
-import 'package:kincare/app/routes/app_pages.dart';
-import 'package:kincare/app/routes/app_routes.dart';
-import 'package:kincare/app/theme/app_theme.dart';
-import 'package:kincare/core/storage/hive_storage.dart';
+
+import 'app/bindings/initial_binding.dart';
+import 'app/constants/app_strings.dart';
+import 'app/routes/app_pages.dart';
+import 'app/routes/app_routes.dart';
+import 'app/theme/app_theme.dart';
+import 'core/storage/hive_storage.dart';
+
 
 /// Application entry point.
 Future<void> main() async {

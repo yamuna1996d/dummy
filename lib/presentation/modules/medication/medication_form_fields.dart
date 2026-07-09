@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kincare/app/constants/app_dimensions.dart';
 import 'package:kincare/app/constants/app_strings.dart';
-import 'package:kincare/core/widgets/custom_dropdown_field.dart';
-import 'package:kincare/core/widgets/custom_text_field.dart';
-import 'package:kincare/core/widgets/form_screen_scaffold.dart'
+import 'package:kincare/presentation/widgets/form_screen_scaffold.dart'
     show formFieldOrderStep;
 import 'package:kincare/presentation/controllers/medication_controller.dart';
+import '../../widgets/custom_dropdown_field.dart';
+import '../../widgets/custom_text_field.dart';
 
 /// Name/child/dosage/frequency/notes fields shared by Add and Edit
 /// Medication - the only difference between those two screens is what
@@ -38,33 +38,33 @@ class MedicationFormFields extends StatelessWidget {
           CustomTextField(
             label: AppStrings.medicationName,
             controller: controller.nameController,
-            hint: 'e.g. Amoxicillin 250 mg',
+            hint: AppStrings.medicationNameHint,
             autofocus: autofocusName,
             textInputAction: TextInputAction.next,
-            semanticLabel: 'Medication name',
+            semanticLabel: AppStrings.medicationNameSemanticLabel,
             validator: (v) =>
-                v == null || v.trim().isEmpty ? 'Name is required' : null,
+            v == null || v.trim().isEmpty ? AppStrings.nameRequired : null,
           ),
         ),
         const SizedBox(height: AppDimensions.spacingMd),
         _ordered(
           1,
           Obx(
-            () => CustomDropdownField<String>(
-              label: 'Child',
-              hint: 'Select a child',
+                () => CustomDropdownField<String>(
+              label: AppStrings.child,
+              hint: AppStrings.selectChild,
               initialValue: controller.selectedChildId.value,
               items: controller.children
                   .map(
                     (child) => DropdownMenuItem(
-                      value: child.id,
-                      child: Text(child.name),
-                    ),
-                  )
+                  value: child.id,
+                  child: Text(child.name),
+                ),
+              )
                   .toList(),
               onChanged: (value) => controller.selectedChildId.value = value,
               validator: (v) =>
-                  v == null || v.isEmpty ? 'Select a child' : null,
+              v == null || v.isEmpty ? AppStrings.selectChild : null,
             ),
           ),
         ),
@@ -74,10 +74,10 @@ class MedicationFormFields extends StatelessWidget {
           CustomTextField(
             label: AppStrings.dosage,
             controller: controller.dosageController,
-            hint: 'e.g. 5 ml',
-            helperText: 'Amount given each time.',
+            hint: AppStrings.dosageHint,
+            helperText: AppStrings.dosageHelper,
             textInputAction: TextInputAction.next,
-            semanticLabel: 'Dosage amount',
+            semanticLabel: AppStrings.dosageSemanticLabel,
           ),
         ),
         const SizedBox(height: AppDimensions.spacingMd),
@@ -85,21 +85,21 @@ class MedicationFormFields extends StatelessWidget {
           3,
           CustomDropdownField<String>(
             label: AppStrings.frequency,
-            hint: 'Select frequency',
+            hint: AppStrings.selectFrequency,
             // Guard: only pass initialValue if it exists in the options list.
             // A value that isn't in the list causes a Flutter DropdownButton
             // assertion crash ("exactly one item must match the value").
             initialValue:
-                MedicationController.frequencyOptions.contains(
-                  controller.selectedFrequency.value,
-                )
+            MedicationController.frequencyOptions.contains(
+              controller.selectedFrequency.value,
+            )
                 ? controller.selectedFrequency.value
                 : null,
             items: MedicationController.frequencyOptions
                 .map(
                   (option) =>
-                      DropdownMenuItem(value: option, child: Text(option)),
-                )
+                  DropdownMenuItem(value: option, child: Text(option)),
+            )
                 .toList(),
             onChanged: (value) => controller.selectedFrequency.value = value,
           ),
@@ -108,12 +108,12 @@ class MedicationFormFields extends StatelessWidget {
         _ordered(
           4,
           CustomTextField(
-            label: 'Notes (optional)',
+            label: AppStrings.notesOptional,
             controller: controller.notesController,
-            hint: 'e.g. give with food',
+            hint: AppStrings.notesHint,
             maxLines: 4,
             textInputAction: TextInputAction.done,
-            semanticLabel: 'Notes',
+            semanticLabel: AppStrings.notesSemanticLabel,
           ),
         ),
       ],

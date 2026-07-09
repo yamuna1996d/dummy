@@ -32,11 +32,6 @@ class LoggerService {
     _logger.i(message, error: error, stackTrace: stackTrace);
   }
 
-  /// Logs a warning-level message.
-  void warning(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    _logger.w(message, error: error, stackTrace: stackTrace);
-  }
-
   /// Logs an error-level message.
   void error(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     _logger.e(message, error: error, stackTrace: stackTrace);

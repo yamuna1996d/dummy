@@ -1,5 +1,6 @@
 import 'package:kincare/app/services/logger_service.dart';
 import 'package:kincare/core/api/graphql_json_executor.dart';
+import 'package:kincare/core/api/graphql_response.dart';
 import 'package:kincare/core/errors/app_exception.dart';
 import 'package:kincare/core/errors/result.dart';
 
@@ -12,7 +13,7 @@ class GraphQLService {
   final _executor = GraphQLJsonExecutor.instance;
 
   /// Executes a GraphQL query.
-  Future<Result<Map<String, dynamic>>> query(
+  Future<Result<GraphQLResponse>> query(
     String document, {
     Map<String, dynamic>? variables,
     String? operationName,
@@ -21,7 +22,7 @@ class GraphQLService {
   }
 
   /// Executes a GraphQL mutation.
-  Future<Result<Map<String, dynamic>>> mutate(
+  Future<Result<GraphQLResponse>> mutate(
     String document, {
     Map<String, dynamic>? variables,
     String? operationName,
@@ -29,7 +30,7 @@ class GraphQLService {
     return _run(document, variables, operationName ?? 'mutation');
   }
 
-  Future<Result<Map<String, dynamic>>> _run(
+  Future<Result<GraphQLResponse>> _run(
     String document,
     Map<String, dynamic>? variables,
     String operationName,
@@ -37,7 +38,7 @@ class GraphQLService {
     try {
       final data = await _executor.execute(document, variables ?? const {});
       _log.debug('$operationName completed successfully');
-      return Result.success(data);
+      return Result.success(GraphQLResponse(data));
     } on AppException catch (e) {
       return Result.failure(e);
     } catch (e, st) {

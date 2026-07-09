@@ -21,17 +21,13 @@ class MedicationRemoteDatasource {
     );
 
     return result.when(
-      success: (data) {
-        final medications = data['medications']?['data'] as List<dynamic>?;
+      success: (response) {
+        final medications = response.connectionItems('medications');
         if (medications == null) {
           return const Result.failure(ParsingException());
         }
         return Result.success(
-          medications
-              .map(
-                (e) => MedicationModel.fromGraphQL(e as Map<String, dynamic>),
-              )
-              .toList(),
+          medications.map((e) => MedicationModel.fromGraphQL(e)).toList(),
         );
       },
       failure: (e) => Result.failure(e),
@@ -58,8 +54,8 @@ class MedicationRemoteDatasource {
     );
 
     return result.when(
-      success: (data) {
-        final created = data['createMedication'] as Map<String, dynamic>?;
+      success: (response) {
+        final created = response.object('createMedication');
         if (created == null) {
           return const Result.failure(ParsingException());
         }
@@ -90,8 +86,8 @@ class MedicationRemoteDatasource {
     );
 
     return result.when(
-      success: (data) {
-        final updated = data['updateMedication'] as Map<String, dynamic>?;
+      success: (response) {
+        final updated = response.object('updateMedication');
         if (updated == null) {
           return const Result.failure(ParsingException());
         }

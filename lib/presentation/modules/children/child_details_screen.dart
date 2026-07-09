@@ -5,14 +5,16 @@ import 'package:kincare/app/constants/app_strings.dart';
 import 'package:kincare/app/routes/app_routes.dart';
 import 'package:kincare/app/theme/app_colors.dart';
 import 'package:kincare/core/accessibility/responsive_helper.dart';
-import 'package:kincare/core/widgets/error_view.dart';
-import 'package:kincare/core/widgets/initials_avatar.dart';
-import 'package:kincare/core/widgets/pill_badge.dart';
-import 'package:kincare/core/widgets/section_label.dart';
 import 'package:kincare/domain/entities/child_entity.dart';
 import 'package:kincare/domain/entities/medication_entity.dart';
 import 'package:kincare/presentation/controllers/children_controller.dart';
 import 'package:kincare/presentation/controllers/medication_controller.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../widgets/error_view.dart';
+import '../../widgets/initials_avatar.dart';
+import '../../widgets/pill_badge.dart';
+import '../../widgets/section_label.dart';
 
 const _monthAbbreviations = [
   'JAN',
@@ -27,24 +29,6 @@ const _monthAbbreviations = [
   'OCT',
   'NOV',
   'DEC',
-];
-
-// Full month names for screen-reader labels — the visual chip shows the
-// 3-letter abbreviation ("OCT"), but TalkBack/VoiceOver spelling that out
-// letter-by-letter is much harder to parse than hearing "October".
-const _monthNames = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
 ];
 
 /// CHILD PROFILE SCREEN
@@ -78,7 +62,7 @@ class ChildDetailsScreen extends StatelessWidget {
     if (childId == null) {
       return Scaffold(
         appBar: AppBar(title: const Text(AppStrings.childDetails)),
-        body: const Center(child: Text('Child not found')),
+        body: const Center(child: Text(AppStrings.childNotFound)),
       );
     }
 
@@ -169,18 +153,20 @@ class _ChildProfileBody extends StatelessWidget {
                     AppRoutes.medications,
                     arguments: {'childId': child.id, 'childName': child.name},
                   ),
-                  child: TextButton(
+                  child: TextButton.icon(
                     onPressed: () => Get.toNamed(
                       AppRoutes.medications,
                       arguments: {'childId': child.id, 'childName': child.name},
                     ),
-                    child: Text(
+                    label: Text(
                       AppStrings.viewHistory,
                       style: TextStyle(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                    icon: Icon(Icons.arrow_forward_ios, size: 16, color: theme.colorScheme.primary),
+                    iconAlignment: IconAlignment.end,
                   ),
                 ),
               ),
@@ -207,7 +193,7 @@ class _ChildProfileBody extends StatelessWidget {
                       vertical: AppDimensions.paddingMd,
                     ),
                     child: Text(
-                      'No active medications',
+                      AppStrings.noActiveMedications,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -243,16 +229,8 @@ class _ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Combine name + age + gender into a single announcement instead of
-    // two separate stops (name, then the "6 years • Female" badge), so a
-    // screen-reader user hears the whole identity summary at once, right
-    // after the avatar.
-    final headerLabel = StringBuffer(child.name);
-    if (child.age != null) headerLabel.write(', ${child.age} years');
-    if (child.gender != null) headerLabel.write(',gender ${child.gender}');
-
     return Semantics(
-      label: headerLabel.toString(),
+      label: AppStrings.childHeaderLabel(child.name, child.age, child.gender),
       excludeSemantics: true,
       child: Column(
         children: [
@@ -301,7 +279,7 @@ class _ProfileHeader extends StatelessWidget {
             const SizedBox(height: AppDimensions.spacingSm),
             PillBadge(
               text: [
-                if (child.age != null) '${child.age} years',
+                if (child.age != null) '${child.age} ${AppStrings.years}',
                 if (child.gender != null) child.gender!,
               ].join(' • '),
               backgroundColor: AppColors.chipTeal,
@@ -328,7 +306,7 @@ class _HealthMetricsRow extends StatelessWidget {
             child: _MetricCard(
               name: child.name,
               icon: Icons.water_drop_outlined,
-              label: 'Blood Group',
+              label: AppStrings.bloodGroup,
               value: child.bloodGroup!,
             ),
           ),
@@ -339,9 +317,9 @@ class _HealthMetricsRow extends StatelessWidget {
             child: _MetricCard(
               name: child.name,
               icon: Icons.monitor_weight_outlined,
-              label: 'Weight',
+              label: AppStrings.weight,
               value:
-                  '${child.weightKg!.toStringAsFixed(child.weightKg! % 1 == 0 ? 0 : 1)} kg',
+              '${child.weightKg!.toStringAsFixed(child.weightKg! % 1 == 0 ? 0 : 1)} ${AppStrings.kg}',
             ),
           ),
       ],
@@ -367,7 +345,7 @@ class _MetricCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Semantics(
-      label: "$name's $label: $value",
+      label: AppStrings.metricLabel(name, label, value),
       excludeSemantics: true,
       child: Card(
         margin: EdgeInsets.zero,
@@ -414,8 +392,11 @@ class _AllergyBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label:
-          '${child.name}s Allergy: ${child.allergyName}${child.allergyNote != null ? ", ${child.allergyNote}" : ""}',
+      label: AppStrings.allergyLabel(
+        child.name,
+        child.allergyName!,
+        child.allergyNote,
+      ),
       excludeSemantics: true,
       child: Container(
         padding: const EdgeInsets.all(AppDimensions.paddingMd),
@@ -436,7 +417,7 @@ class _AllergyBanner extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Allergies',
+                    AppStrings.allergies,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -479,8 +460,11 @@ class _MedicationCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Semantics(
-      label:
-          'active medication ${medication.name}, dosage: ${medication.dosage ?? ""}, ${medication.frequency ?? ""}',
+      label: AppStrings.activeMedicationLabel(
+        medication.name,
+        medication.dosage,
+        medication.frequency,
+      ),
       excludeSemantics: true,
       child: Card(
         child: Padding(
@@ -545,17 +529,25 @@ class _AppointmentCard extends StatelessWidget {
     final location = child.nextAppointmentLocation;
     final phone = child.nextAppointmentClinicPhone;
 
-    // Merge the date chip + title + time + location into one combined
-    // announcement, the same way the Dashboard's "Upcoming Visit" card
-    // works — otherwise the date badge reads as two disconnected
-    // fragments ("O-C-T", "12") and the time/location rows have no
-    // context tying them to this appointment.
-    final appointmentLabel = StringBuffer('Upcoming appointment: $title');
-    if (date != null) {
-      appointmentLabel.write(' on ${_monthNames[date.month - 1]} ${date.day}');
+    Future<void> launchPhone(String phoneNumber) async {
+      final uri = Uri(scheme: 'tel', path: phoneNumber);
+      try {
+        await launchUrl(uri);
+      } catch (_) {
+        Get.snackbar(AppStrings.error, AppStrings.couldNotOpenPhone);
+      }
     }
-    if (time != null) appointmentLabel.write(', at $time');
-    if (location != null) appointmentLabel.write(', location $location');
+
+    Future<void> launchDirections(String address) async {
+      final uri = Uri.parse(
+        '${AppStrings.getDirectionUrl}${Uri.encodeComponent(address)}',
+      );
+      try {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } catch (_) {
+        Get.snackbar(AppStrings.error, AppStrings.couldNotOpenMaps);
+      }
+    }
 
     return Card(
       child: Padding(
@@ -564,7 +556,12 @@ class _AppointmentCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Semantics(
-              label: appointmentLabel.toString(),
+              label: AppStrings.appointmentLabel(
+                title: title!,
+                date: date,
+                time: time,
+                location: location,
+              ),
               excludeSemantics: true,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -606,7 +603,7 @@ class _AppointmentCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          title!,
+                          title,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -627,59 +624,59 @@ class _AppointmentCard extends StatelessWidget {
             const SizedBox(height: AppDimensions.spacingMd),
             FocusTraversalGroup(
               policy: OrderedTraversalPolicy(),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: FocusTraversalOrder(
-                      order: const NumericFocusOrder(0),
-                      child: Semantics(
-                        button: true,
-                        label: 'Get directions',
-                        hint: location != null
-                            ? 'Shows directions to $location'
-                            : 'Shows directions to the clinic',
-                        excludeSemantics: true,
-                        onTap: () => Get.snackbar(
-                          'Get Directions',
-                          location ?? 'Location not available',
-                        ),
-                        child: FilledButton(
-                          onPressed: () => Get.snackbar(
-                            'Get Directions',
-                            location ?? 'Location not available',
+              child: IntrinsicHeight(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: FocusTraversalOrder(
+                        order: const NumericFocusOrder(0),
+                        child: Semantics(
+                          button: true,
+                          label: AppStrings.getDirectionsLabel,
+                          hint: AppStrings.directionsHint(location),
+                          excludeSemantics: true,
+                          onTap: () => location != null
+                              ? launchDirections(location)
+                              : Get.snackbar(AppStrings.getDirections, AppStrings.locationNotAvailable),
+                          child: FilledButton(
+                            onPressed: () => location != null
+                                ? launchDirections(location)
+                                : Get.snackbar(AppStrings.getDirections, AppStrings.locationNotAvailable),
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size.fromHeight(48),
+                            ),
+                            child: const Text(AppStrings.getDirections),
                           ),
-                          child: const Text('Get Directions'),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: AppDimensions.spacingMd),
-                  Expanded(
-                    child: FocusTraversalOrder(
-                      order: const NumericFocusOrder(1),
-                      child: Semantics(
-                        button: true,
-                        label: 'Call clinic',
-                        hint: phone != null
-                            ? 'Calls $phone'
-                            : 'Calls the clinic',
-                        excludeSemantics: true,
-                        onTap: () => Get.snackbar(
-                          'Call Clinic',
-                          phone ?? 'Phone number not available',
-                        ),
-                        child: OutlinedButton.icon(
-                          onPressed: () => Get.snackbar(
-                            'Call Clinic',
-                            phone ?? 'Phone number not available',
+                    const SizedBox(width: AppDimensions.spacingMd),
+                    Expanded(
+                      child: FocusTraversalOrder(
+                        order: const NumericFocusOrder(1),
+                        child: Semantics(
+                          button: true,
+                          label: AppStrings.callClinicLabel,
+                          hint: AppStrings.callClinicHint(phone),
+                          excludeSemantics: true,
+                          onTap: () => phone != null
+                              ? launchPhone(phone)
+                              : Get.snackbar(AppStrings.callClinic, AppStrings.phoneNotAvailable),
+                          child: OutlinedButton.icon(
+                            onPressed: () => phone != null
+                                ? launchPhone(phone)
+                                : Get.snackbar(AppStrings.callClinic, AppStrings.phoneNotAvailable),
+                            icon: const Icon(Icons.call_outlined, size: 18),
+                            label: const Text(AppStrings.callClinic),
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(48),
+                            ),
                           ),
-                          icon: const Icon(Icons.call_outlined, size: 18),
-                          label: const Text('Call Clinic'),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kincare/core/api/graphql_response.dart';
 import 'package:kincare/core/errors/app_exception.dart';
 import 'package:kincare/core/errors/result.dart';
 import 'package:kincare/data/datasource/remote/auth_remote_datasource.dart';
@@ -40,9 +41,11 @@ void main() {
         when(
           graphQLService.query(any, variables: anyNamed('variables')),
         ).thenAnswer(
-          (_) async => const Result.success({
-            'user': {'id': '1', 'name': 'Admin User', 'username': 'admin'},
-          }),
+          (_) async => const Result.success(
+            GraphQLResponse({
+              'user': {'id': '1', 'name': 'Admin User', 'username': 'admin'},
+            }),
+          ),
         );
 
         final result = await datasource.login('admin@kincare.com', 'password');
@@ -64,7 +67,7 @@ void main() {
       () async {
         when(
           graphQLService.query(any, variables: anyNamed('variables')),
-        ).thenAnswer((_) async => const Result.success({}));
+        ).thenAnswer((_) async => const Result.success(GraphQLResponse({})));
 
         final result = await datasource.login('admin@kincare.com', 'password');
 

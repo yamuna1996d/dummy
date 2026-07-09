@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kincare/app/constants/app_dimensions.dart';
+import 'package:kincare/app/constants/app_strings.dart';
 
 /// Reusable summary statistic card for the dashboard.
 class SummaryCard extends StatelessWidget {
@@ -28,7 +29,7 @@ class SummaryCard extends StatelessWidget {
     return Semantics(
       button: onTap != null,
       label: semanticLabel ?? '$title: $value',
-      hint: onTap != null ? 'Opens more details' : null,
+      hint: onTap != null ? AppStrings.opensMoreDetailsHint : null,
       child: Card(
         child: InkWell(
           onTap: onTap,

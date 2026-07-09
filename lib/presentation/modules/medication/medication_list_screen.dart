@@ -5,15 +5,16 @@ import 'package:kincare/app/constants/app_strings.dart';
 import 'package:kincare/app/routes/app_routes.dart';
 import 'package:kincare/app/theme/app_colors.dart';
 import 'package:kincare/core/accessibility/responsive_helper.dart';
-import 'package:kincare/core/widgets/confirm_dialog.dart';
-import 'package:kincare/core/widgets/empty_view.dart';
-import 'package:kincare/core/widgets/error_view.dart';
-import 'package:kincare/core/widgets/loading_view.dart';
-import 'package:kincare/core/widgets/pill_badge.dart';
 import 'package:kincare/domain/entities/medication_entity.dart';
 import 'package:kincare/presentation/controllers/medication_controller.dart';
 import 'package:kincare/presentation/widgets/kincare_app_bar.dart';
 import 'package:kincare/presentation/widgets/app_drawer.dart';
+
+import '../../widgets/confirm_dialog.dart';
+import '../../widgets/empty_view.dart';
+import '../../widgets/error_view.dart';
+import '../../widgets/loading_view.dart';
+import '../../widgets/pill_badge.dart';
 
 /// MEDICATION LIST SCREEN
 ///
@@ -51,18 +52,17 @@ class MedicationListScreen extends GetView<MedicationController> {
     controller.setChildFilter(childId);
 
     final headingText = childId != null
-        ? 'Medication history'
-        : 'All medications';
-    const subtitleText = 'Manage daily dosage and records';
+        ? AppStrings.medicationHistory
+        : AppStrings.allMedications;
 
     return Scaffold(
       appBar: childId != null
           ? AppBar(
-              title: Semantics(
-                headingLevel: 1,
-                child: Text("$childName's Medications"),
-              ),
-            )
+        title: Semantics(
+          headingLevel: 1,
+          child: Text(AppStrings.childMedicationsTitle(childName ?? '')),
+        ),
+      )
           : const KinCareAppBar(),
       drawer: childId != null ? null : const AppDrawer(),
       body: Column(
@@ -82,7 +82,7 @@ class MedicationListScreen extends GetView<MedicationController> {
                     // daily dosage and records." — instead of reading as
                     // two disconnected stops.
                     headingLevel: childId == null ? 1 : null,
-                    label: '$headingText. $subtitleText',
+                    label: '$headingText. ${AppStrings.medicationListSubtitle}',
                     excludeSemantics: true,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,7 +95,7 @@ class MedicationListScreen extends GetView<MedicationController> {
                         ),
                         const SizedBox(height: AppDimensions.spacingXs),
                         Text(
-                          subtitleText,
+                          AppStrings.medicationListSubtitle,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -150,7 +150,7 @@ class MedicationListScreen extends GetView<MedicationController> {
               if (controller.filteredMedications.isEmpty) {
                 return EmptyView(
                   message: childId != null
-                      ? 'No medications for $childName yet'
+                      ? AppStrings.noMedicationsForChild(childName ?? '')
                       : AppStrings.noMedications,
                   icon: Icons.medication_outlined,
                   actionLabel: AppStrings.addMedication,
@@ -191,7 +191,7 @@ class _MedicationCardList extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: controller.refresh,
       child: Obx(
-        () => ListView.builder(
+            () => ListView.builder(
           padding: EdgeInsets.symmetric(
             horizontal: padding,
             vertical: AppDimensions.paddingSm,
@@ -227,10 +227,10 @@ class _MedicationCard extends StatelessWidget {
     // Look up the child's display name from the controller's in-memory list
     // instead of storing it on MedicationEntity, keeping the entity clean.
     final matchedChildren = controller.children.where(
-      (c) => c.id == medication.childId,
+          (c) => c.id == medication.childId,
     );
     final childName = matchedChildren.isEmpty
-        ? 'Unassigned'
+        ? AppStrings.unassigned
         : matchedChildren.first.name;
     final isActive = medication.isActive;
 
@@ -238,11 +238,12 @@ class _MedicationCard extends StatelessWidget {
     // active/inactive status — into a single announcement, rather than
     // reading the name, the child pill, the frequency text, and the
     // status badge as four disconnected stops.
-    final cardLabel =
-        'Selected medication: ${medication.name}, '
-        'medication status is ${isActive ? "active" : "inactive"}, '
-        'child name is $childName, '
-        'dosage ${medication.frequency ?? "not specified"}, ';
+    final cardLabel = AppStrings.medicationCardLabel(
+      name: medication.name,
+      isActive: isActive,
+      childName: childName,
+      frequency: medication.frequency,
+    );
 
     return Card(
       margin: const EdgeInsets.only(bottom: AppDimensions.spacingMd),
@@ -305,7 +306,7 @@ class _MedicationCard extends StatelessWidget {
                     ),
                   ),
                   PillBadge(
-                    text: isActive ? 'Active' : 'Inactive',
+                    text: isActive ? AppStrings.active : AppStrings.inactive,
                     backgroundColor: isActive
                         ? AppColors.successLight
                         : theme.colorScheme.surfaceContainerHighest,
@@ -328,7 +329,7 @@ class _MedicationCard extends StatelessWidget {
                     order: const NumericFocusOrder(0),
                     child: Semantics(
                       button: true,
-                      label: 'Edit ${medication.name}',
+                      label: AppStrings.editItemLabel(medication.name),
                       excludeSemantics: true,
                       onTap: () async {
                         await Get.toNamed(
@@ -361,7 +362,7 @@ class _MedicationCard extends StatelessWidget {
                     order: const NumericFocusOrder(1),
                     child: Semantics(
                       button: true,
-                      label: 'Delete ${medication.name}',
+                      label: AppStrings.deleteItemLabel(medication.name),
                       excludeSemantics: true,
                       onTap: () => _confirmDelete(context),
                       child: _FocusHighlightButton(
@@ -474,12 +475,12 @@ class _FocusHighlightButtonState extends State<_FocusHighlightButton> {
         ),
         boxShadow: _isFocused
             ? [
-                BoxShadow(
-                  color: highlightColor.withValues(alpha: 0.35),
-                  blurRadius: 6,
-                  spreadRadius: 1,
-                ),
-              ]
+          BoxShadow(
+            color: highlightColor.withValues(alpha: 0.35),
+            blurRadius: 6,
+            spreadRadius: 1,
+          ),
+        ]
             : null,
       ),
       child: IconButton(

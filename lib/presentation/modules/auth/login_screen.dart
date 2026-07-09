@@ -3,9 +3,10 @@ import 'package:get/get.dart';
 import 'package:kincare/app/constants/app_dimensions.dart';
 import 'package:kincare/app/constants/app_strings.dart';
 import 'package:kincare/core/accessibility/responsive_helper.dart';
-import 'package:kincare/core/widgets/custom_text_field.dart';
-import 'package:kincare/core/widgets/primary_button.dart';
 import 'package:kincare/presentation/controllers/auth_controller.dart';
+
+import '../../widgets/custom_text_field.dart';
+import '../../widgets/primary_button.dart';
 
 /// LOGIN SCREEN
 ///
@@ -44,37 +45,43 @@ class LoginScreen extends GetView<AuthController> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Logo icon
-                  Semantics(
-                    image: true,
-                    label: '${AppStrings.appName} logo',
-                    child: Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Icon(Icons.spa, color: Colors.white, size: 36),
+                  MergeSemantics(
+                    child: Column(
+                      children: [
+                        Semantics(
+                          image: true,
+                          label: AppStrings.logoLabel,
+                          child: Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary,
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Icon(Icons.spa, color: Colors.white, size: 36),
+                          ),
+                        ),
+                        const SizedBox(height: AppDimensions.spacingLg),
+                        Semantics(
+                          headingLevel: 1,
+                          child: Text(
+                            AppStrings.welcomeBack,
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppDimensions.spacingSm),
+                        Text(
+                          AppStrings.loginSubtitle,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: AppDimensions.spacingLg),
-                  Semantics(
-                    headingLevel: 1,
-                    child: Text(
-                      AppStrings.welcomeBack,
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppDimensions.spacingSm),
-                  Text(
-                    "Continue managing your child's health\nwith Clinical Compassion.",
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppDimensions.spacingXl),
 
@@ -116,7 +123,7 @@ class LoginScreen extends GetView<AuthController> {
                                         ),
                                         decoration: BoxDecoration(
                                           color:
-                                              theme.colorScheme.errorContainer,
+                                          theme.colorScheme.errorContainer,
                                           borderRadius: BorderRadius.circular(
                                             AppDimensions.radiusMd,
                                           ),
@@ -136,10 +143,10 @@ class LoginScreen extends GetView<AuthController> {
                                                 error,
                                                 style: theme.textTheme.bodySmall
                                                     ?.copyWith(
-                                                      color: theme
-                                                          .colorScheme
-                                                          .onErrorContainer,
-                                                    ),
+                                                  color: theme
+                                                      .colorScheme
+                                                      .onErrorContainer,
+                                                ),
                                               ),
                                             ),
                                           ],
@@ -149,7 +156,7 @@ class LoginScreen extends GetView<AuthController> {
                                   );
                                 }),
                                 Text(
-                                  'Email Address',
+                                  AppStrings.emailAddress,
                                   style: theme.textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -159,25 +166,22 @@ class LoginScreen extends GetView<AuthController> {
                                   order: const NumericFocusOrder(0),
                                   child: CustomTextField(
                                     label: '',
-                                    hint: 'parent@example.com',
+                                    hint: AppStrings.emailFieldHint,
                                     controller: controller.emailController,
                                     focusNode: controller.emailFocusNode,
                                     keyboardType: TextInputType.emailAddress,
                                     textInputAction: TextInputAction.next,
                                     prefixIcon: Icons.mail_outline,
                                     validator: controller.validateEmail,
-                                    semanticLabel: 'Email address',
+                                    semanticLabel: AppStrings.emailSemanticLabel,
                                     onSubmitted: (_) {
-                                      // Move focus to password field when the
-                                      // user presses "next" on the keyboard.
-                                      controller.passwordFocusNode
-                                          .requestFocus();
+                                      controller.passwordFocusNode.requestFocus();
                                     },
                                   ),
                                 ),
                                 const SizedBox(height: AppDimensions.spacingMd),
                                 Text(
-                                  'Password',
+                                  AppStrings.password,
                                   style: theme.textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -186,22 +190,22 @@ class LoginScreen extends GetView<AuthController> {
                                 FocusTraversalOrder(
                                   order: const NumericFocusOrder(1),
                                   child: Obx(
-                                    () => CustomTextField(
+                                        () => CustomTextField(
                                       label: '',
-                                      hint: '',
+                                      hint: AppStrings.passwordFieldHint,
                                       controller: controller.passwordController,
                                       focusNode: controller.passwordFocusNode,
                                       obscureText:
-                                          controller.obscurePassword.value,
+                                      controller.obscurePassword.value,
                                       textInputAction: TextInputAction.done,
                                       prefixIcon: Icons.lock_outline,
                                       validator: controller.validatePassword,
-                                      semanticLabel: 'Password',
+                                      semanticLabel: AppStrings.passwordSemanticLabel,
                                       suffixIcon: Semantics(
                                         button: true,
                                         label: controller.obscurePassword.value
-                                            ? 'Show password'
-                                            : 'Hide password',
+                                            ? AppStrings.showPassword
+                                            : AppStrings.hidePassword,
                                         child: IconButton(
                                           icon: Icon(
                                             controller.obscurePassword.value
@@ -223,11 +227,11 @@ class LoginScreen extends GetView<AuthController> {
                                 FocusTraversalOrder(
                                   order: const NumericFocusOrder(2),
                                   child: Obx(
-                                    () => PrimaryButton(
-                                      label: 'Log in',
+                                        () => PrimaryButton(
+                                      label: AppStrings.logIn,
                                       onPressed: controller.login,
                                       isLoading: controller.isLoading.value,
-                                      semanticLabel: 'Log in',
+                                      semanticLabel: AppStrings.logIn,
                                     ),
                                   ),
                                 ),
@@ -240,7 +244,7 @@ class LoginScreen extends GetView<AuthController> {
                   ),
                   const SizedBox(height: AppDimensions.spacingLg),
                   Text(
-                    'Demo: admin@kincare.com / password',
+                    AppStrings.demoCredentials,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

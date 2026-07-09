@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:kincare/core/errors/app_exception.dart';
+import 'package:kincare/core/network/network_info.dart';
 import 'package:kincare/domain/entities/child_entity.dart';
 import 'package:kincare/domain/usecases/get_children_usecase.dart';
 import 'package:kincare/domain/usecases/get_child_details_usecase.dart';
@@ -9,11 +12,15 @@ class ChildrenController extends GetxController {
   ChildrenController({
     required GetChildrenUseCase getChildrenUseCase,
     required GetChildDetailsUseCase getChildDetailsUseCase,
+    required NetworkInfo networkInfo,
   }) : _getChildrenUseCase = getChildrenUseCase,
-       _getChildDetailsUseCase = getChildDetailsUseCase;
+       _getChildDetailsUseCase = getChildDetailsUseCase,
+       _networkInfo = networkInfo;
 
   final GetChildrenUseCase _getChildrenUseCase;
   final GetChildDetailsUseCase _getChildDetailsUseCase;
+  final NetworkInfo _networkInfo;
+  StreamSubscription<bool>? _connectivitySubscription;
 
   final isLoading = true.obs;
   final isLoadingDetails = false.obs;
@@ -33,6 +40,19 @@ class ChildrenController extends GetxController {
   void onInit() {
     super.onInit();
     loadChildren();
+    // Retry as soon as connectivity is restored, so the list doesn't stay
+    // stuck empty/stale after a disconnect-then-reconnect.
+    _connectivitySubscription = _networkInfo.onConnectivityChanged.listen((
+      isConnected,
+    ) {
+      if (isConnected) loadChildren();
+    });
+  }
+
+  @override
+  void onClose() {
+    _connectivitySubscription?.cancel();
+    super.onClose();
   }
 
   /// Loads children list from the repository.

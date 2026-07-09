@@ -17,8 +17,8 @@ class ProfileRemoteDatasource {
     );
 
     return result.when(
-      success: (data) {
-        final userData = data['user'] as Map<String, dynamic>?;
+      success: (response) {
+        final userData = response.object('user');
         if (userData == null) {
           return const Result.failure(ParsingException());
         }

@@ -10,6 +10,7 @@ import '../../../helpers/mocks.mocks.dart';
 void main() {
   late MockGetChildrenUseCase getChildrenUseCase;
   late MockGetChildDetailsUseCase getChildDetailsUseCase;
+  late MockNetworkInfo networkInfo;
   late ChildrenController controller;
 
   List<ChildEntity> childrenNamed(List<String> names) => [
@@ -20,9 +21,14 @@ void main() {
   setUp(() {
     getChildrenUseCase = MockGetChildrenUseCase();
     getChildDetailsUseCase = MockGetChildDetailsUseCase();
+    networkInfo = MockNetworkInfo();
+    when(
+      networkInfo.onConnectivityChanged,
+    ).thenAnswer((_) => const Stream.empty());
     controller = ChildrenController(
       getChildrenUseCase: getChildrenUseCase,
       getChildDetailsUseCase: getChildDetailsUseCase,
+      networkInfo: networkInfo,
     );
   });
 

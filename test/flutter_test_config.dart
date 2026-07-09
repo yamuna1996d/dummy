@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:kincare/core/api/graphql_response.dart';
 import 'package:kincare/core/errors/result.dart';
 import 'package:kincare/data/models/child_model.dart';
 import 'package:kincare/data/models/dashboard_model.dart';
@@ -42,8 +43,8 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   provideDummy<Result<UserEntity>>(
     const Result.success(UserEntity(id: '', name: '', email: '')),
   );
-  provideDummy<Result<Map<String, dynamic>>>(
-    const Result.success(<String, dynamic>{}),
+  provideDummy<Result<GraphQLResponse>>(
+    const Result.success(GraphQLResponse(<String, dynamic>{})),
   );
   provideDummy<Result<bool>>(const Result.success(false));
 

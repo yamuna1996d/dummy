@@ -3,8 +3,9 @@ import 'package:get/get.dart';
 import 'package:kincare/app/constants/app_dimensions.dart';
 import 'package:kincare/app/constants/app_strings.dart';
 import 'package:kincare/app/routes/app_routes.dart';
-import 'package:kincare/core/widgets/confirm_dialog.dart';
 import 'package:kincare/presentation/controllers/auth_controller.dart';
+
+import 'confirm_dialog.dart';
 
 /// Navigation drawer with accessibility support.
 ///
@@ -33,7 +34,7 @@ class AppDrawer extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Semantics(
-      label: 'Navigation menu',
+      label: AppStrings.navigationMenu,
       child: Drawer(
         width: AppDimensions.drawerWidth,
         child: SafeArea(
@@ -54,7 +55,7 @@ class AppDrawer extends StatelessWidget {
                     children: [
                       Semantics(
                         image: true,
-                        label: '${AppStrings.appName} logo',
+                        label: AppStrings.logoLabel,
                         child: CircleAvatar(
                           radius: AppDimensions.avatarMd / 2,
                           backgroundColor: theme.colorScheme.primaryContainer,
@@ -78,7 +79,6 @@ class AppDrawer extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Divider(indent: 28, endIndent: 28),
                 _destination(
                   context,
                   index: 0,
@@ -100,7 +100,6 @@ class AppDrawer extends StatelessWidget {
                   selectedIcon: Icons.person,
                   label: AppStrings.profile,
                 ),
-                const Divider(indent: 28, endIndent: 28),
                 _destination(
                   context,
                   index: 3,
@@ -115,10 +114,10 @@ class AppDrawer extends StatelessWidget {
                   selectedIcon: Icons.info,
                   label: AppStrings.about,
                 ),
-                const Divider(indent: 28, endIndent: 28),
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: AppDimensions.paddingLg,
+                    horizontal: AppDimensions.paddingSm,
+                    vertical: AppDimensions.spacingXxs,
                   ),
                   child: Semantics(
                     button: true,
@@ -146,12 +145,12 @@ class AppDrawer extends StatelessWidget {
   }
 
   Widget _destination(
-    BuildContext context, {
-    required int index,
-    required IconData icon,
-    required IconData selectedIcon,
-    required String label,
-  }) {
+      BuildContext context, {
+        required int index,
+        required IconData icon,
+        required IconData selectedIcon,
+        required String label,
+      }) {
     final theme = Theme.of(context);
     final selected = index == _selectedIndex;
 
@@ -208,7 +207,7 @@ class AppDrawer extends StatelessWidget {
   }
 
   void _onDestinationSelected(BuildContext context, int index) {
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(); // close drawer
 
     final routes = [
       AppRoutes.dashboard,
@@ -218,8 +217,21 @@ class AppDrawer extends StatelessWidget {
       AppRoutes.about,
     ];
 
-    if (index < routes.length) {
-      Get.offAllNamed(routes[index]);
+    if (index >= routes.length) return;
+
+    final target = routes[index];
+
+    // Already on this route — just close the drawer.
+    if (Get.currentRoute == target) return;
+
+    if (index == 0) {
+      // Dashboard is the root — clear everything back to it.
+      Get.offAllNamed(AppRoutes.dashboard);
+    } else {
+      // Push on top of dashboard so back button returns there.
+      Get.offNamedUntil(target, (route) {
+        return route.settings.name == AppRoutes.dashboard;
+      });
     }
   }
 

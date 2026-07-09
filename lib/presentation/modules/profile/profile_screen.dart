@@ -3,12 +3,13 @@ import 'package:get/get.dart';
 import 'package:kincare/app/constants/app_dimensions.dart';
 import 'package:kincare/app/constants/app_strings.dart';
 import 'package:kincare/core/accessibility/responsive_helper.dart';
-import 'package:kincare/core/widgets/error_view.dart';
-import 'package:kincare/core/widgets/info_tile.dart';
-import 'package:kincare/core/widgets/initials_avatar.dart';
-import 'package:kincare/core/widgets/loading_view.dart';
 import 'package:kincare/presentation/controllers/profile_controller.dart';
 import 'package:kincare/presentation/widgets/back_to_dashboard_app_bar.dart';
+
+import '../../widgets/error_view.dart';
+import '../../widgets/info_tile.dart';
+import '../../widgets/initials_avatar.dart';
+import '../../widgets/loading_view.dart';
 
 /// PROFILE SCREEN
 ///
@@ -44,13 +45,6 @@ class ProfileScreen extends GetView<ProfileController> {
         // in a race, so this catches any residual null state.
         if (user == null) return const LoadingView();
 
-        // "Name: John Doe, username @admin" — merged into one announcement
-        // instead of the name and the @handle reading as two separate,
-        // unlabeled stops.
-        final identityLabel = user.username != null
-            ? 'Name: ${user.name}, username: @${user.username}'
-            : 'Name: ${user.name}';
-
         return SingleChildScrollView(
           padding: EdgeInsets.symmetric(
             horizontal: padding,
@@ -69,11 +63,14 @@ class ProfileScreen extends GetView<ProfileController> {
                     backgroundColor: theme.colorScheme.primaryContainer,
                     foregroundColor: theme.colorScheme.onPrimaryContainer,
                     fontSize: theme.textTheme.headlineLarge?.fontSize,
-                    semanticLabel: 'Profile avatar for ${user.name}',
+                    semanticLabel: AppStrings.profileAvatarLabel(user.name),
                   ),
                   const SizedBox(height: AppDimensions.spacingMd),
                   Semantics(
-                    label: identityLabel,
+                    label: AppStrings.profileIdentityLabel(
+                      user.name,
+                      user.username,
+                    ),
                     excludeSemantics: true,
                     child: Column(
                       children: [
@@ -98,7 +95,7 @@ class ProfileScreen extends GetView<ProfileController> {
                     child: Column(
                       children: [
                         Semantics(
-                          label: 'Email: ${user.email}',
+                          label: AppStrings.emailInfoLabel(user.email),
                           excludeSemantics: true,
                           child: InfoTile(
                             icon: Icons.email_outlined,
@@ -108,12 +105,12 @@ class ProfileScreen extends GetView<ProfileController> {
                         ),
                         const Divider(height: 1),
                         Semantics(
-                          label: 'Phone: ${user.phone ?? "Not set"}',
+                          label: AppStrings.phoneInfoLabel(user.phone),
                           excludeSemantics: true,
                           child: InfoTile(
                             icon: Icons.phone_outlined,
                             label: AppStrings.phone,
-                            value: user.phone ?? 'Not set',
+                            value: user.phone ?? AppStrings.notSet,
                           ),
                         ),
                       ],

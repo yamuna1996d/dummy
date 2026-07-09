@@ -5,6 +5,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
 
+import 'package:kincare/core/api/graphql_response.dart' as _i27;
 import 'package:kincare/core/api/graphql_service.dart' as _i26;
 import 'package:kincare/core/errors/result.dart' as _i4;
 import 'package:kincare/core/network/network_info.dart' as _i24;
@@ -34,16 +35,16 @@ import 'package:kincare/domain/repositories/children_repository.dart' as _i2;
 import 'package:kincare/domain/repositories/dashboard_repository.dart' as _i9;
 import 'package:kincare/domain/repositories/medication_repository.dart' as _i7;
 import 'package:kincare/domain/repositories/profile_repository.dart' as _i11;
-import 'package:kincare/domain/usecases/create_medication_usecase.dart' as _i30;
-import 'package:kincare/domain/usecases/delete_medication_usecase.dart' as _i32;
-import 'package:kincare/domain/usecases/get_child_details_usecase.dart' as _i28;
-import 'package:kincare/domain/usecases/get_children_usecase.dart' as _i27;
-import 'package:kincare/domain/usecases/get_dashboard_usecase.dart' as _i33;
-import 'package:kincare/domain/usecases/get_medications_usecase.dart' as _i29;
-import 'package:kincare/domain/usecases/get_profile_usecase.dart' as _i34;
-import 'package:kincare/domain/usecases/login_usecase.dart' as _i35;
-import 'package:kincare/domain/usecases/logout_usecase.dart' as _i36;
-import 'package:kincare/domain/usecases/update_medication_usecase.dart' as _i31;
+import 'package:kincare/domain/usecases/create_medication_usecase.dart' as _i31;
+import 'package:kincare/domain/usecases/delete_medication_usecase.dart' as _i33;
+import 'package:kincare/domain/usecases/get_child_details_usecase.dart' as _i29;
+import 'package:kincare/domain/usecases/get_children_usecase.dart' as _i28;
+import 'package:kincare/domain/usecases/get_dashboard_usecase.dart' as _i34;
+import 'package:kincare/domain/usecases/get_medications_usecase.dart' as _i30;
+import 'package:kincare/domain/usecases/get_profile_usecase.dart' as _i35;
+import 'package:kincare/domain/usecases/login_usecase.dart' as _i36;
+import 'package:kincare/domain/usecases/logout_usecase.dart' as _i37;
+import 'package:kincare/domain/usecases/update_medication_usecase.dart' as _i32;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i6;
 
@@ -646,7 +647,7 @@ class MockGraphQLService extends _i1.Mock implements _i26.GraphQLService {
   }
 
   @override
-  _i3.Future<_i4.Result<Map<String, dynamic>>> query(
+  _i3.Future<_i4.Result<_i27.GraphQLResponse>> query(
     String? document, {
     Map<String, dynamic>? variables,
     String? operationName,
@@ -657,8 +658,8 @@ class MockGraphQLService extends _i1.Mock implements _i26.GraphQLService {
               [document],
               {#variables: variables, #operationName: operationName},
             ),
-            returnValue: _i3.Future<_i4.Result<Map<String, dynamic>>>.value(
-              _i6.dummyValue<_i4.Result<Map<String, dynamic>>>(
+            returnValue: _i3.Future<_i4.Result<_i27.GraphQLResponse>>.value(
+              _i6.dummyValue<_i4.Result<_i27.GraphQLResponse>>(
                 this,
                 Invocation.method(
                   #query,
@@ -668,10 +669,10 @@ class MockGraphQLService extends _i1.Mock implements _i26.GraphQLService {
               ),
             ),
           )
-          as _i3.Future<_i4.Result<Map<String, dynamic>>>);
+          as _i3.Future<_i4.Result<_i27.GraphQLResponse>>);
 
   @override
-  _i3.Future<_i4.Result<Map<String, dynamic>>> mutate(
+  _i3.Future<_i4.Result<_i27.GraphQLResponse>> mutate(
     String? document, {
     Map<String, dynamic>? variables,
     String? operationName,
@@ -682,8 +683,8 @@ class MockGraphQLService extends _i1.Mock implements _i26.GraphQLService {
               [document],
               {#variables: variables, #operationName: operationName},
             ),
-            returnValue: _i3.Future<_i4.Result<Map<String, dynamic>>>.value(
-              _i6.dummyValue<_i4.Result<Map<String, dynamic>>>(
+            returnValue: _i3.Future<_i4.Result<_i27.GraphQLResponse>>.value(
+              _i6.dummyValue<_i4.Result<_i27.GraphQLResponse>>(
                 this,
                 Invocation.method(
                   #mutate,
@@ -693,14 +694,14 @@ class MockGraphQLService extends _i1.Mock implements _i26.GraphQLService {
               ),
             ),
           )
-          as _i3.Future<_i4.Result<Map<String, dynamic>>>);
+          as _i3.Future<_i4.Result<_i27.GraphQLResponse>>);
 }
 
 /// A class which mocks [GetChildrenUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockGetChildrenUseCase extends _i1.Mock
-    implements _i27.GetChildrenUseCase {
+    implements _i28.GetChildrenUseCase {
   MockGetChildrenUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -723,7 +724,7 @@ class MockGetChildrenUseCase extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockGetChildDetailsUseCase extends _i1.Mock
-    implements _i28.GetChildDetailsUseCase {
+    implements _i29.GetChildDetailsUseCase {
   MockGetChildDetailsUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -746,7 +747,7 @@ class MockGetChildDetailsUseCase extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockGetMedicationsUseCase extends _i1.Mock
-    implements _i29.GetMedicationsUseCase {
+    implements _i30.GetMedicationsUseCase {
   MockGetMedicationsUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -770,7 +771,7 @@ class MockGetMedicationsUseCase extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockCreateMedicationUseCase extends _i1.Mock
-    implements _i30.CreateMedicationUseCase {
+    implements _i31.CreateMedicationUseCase {
   MockCreateMedicationUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -795,7 +796,7 @@ class MockCreateMedicationUseCase extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockUpdateMedicationUseCase extends _i1.Mock
-    implements _i31.UpdateMedicationUseCase {
+    implements _i32.UpdateMedicationUseCase {
   MockUpdateMedicationUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -820,7 +821,7 @@ class MockUpdateMedicationUseCase extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockDeleteMedicationUseCase extends _i1.Mock
-    implements _i32.DeleteMedicationUseCase {
+    implements _i33.DeleteMedicationUseCase {
   MockDeleteMedicationUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -843,7 +844,7 @@ class MockDeleteMedicationUseCase extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockGetDashboardUseCase extends _i1.Mock
-    implements _i33.GetDashboardUseCase {
+    implements _i34.GetDashboardUseCase {
   MockGetDashboardUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -865,7 +866,7 @@ class MockGetDashboardUseCase extends _i1.Mock
 /// A class which mocks [GetProfileUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockGetProfileUseCase extends _i1.Mock implements _i34.GetProfileUseCase {
+class MockGetProfileUseCase extends _i1.Mock implements _i35.GetProfileUseCase {
   MockGetProfileUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -887,7 +888,7 @@ class MockGetProfileUseCase extends _i1.Mock implements _i34.GetProfileUseCase {
 /// A class which mocks [LoginUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLoginUseCase extends _i1.Mock implements _i35.LoginUseCase {
+class MockLoginUseCase extends _i1.Mock implements _i36.LoginUseCase {
   MockLoginUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -921,7 +922,7 @@ class MockLoginUseCase extends _i1.Mock implements _i35.LoginUseCase {
 /// A class which mocks [LogoutUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLogoutUseCase extends _i1.Mock implements _i36.LogoutUseCase {
+class MockLogoutUseCase extends _i1.Mock implements _i37.LogoutUseCase {
   MockLogoutUseCase() {
     _i1.throwOnMissingStub(this);
   }

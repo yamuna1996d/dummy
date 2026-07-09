@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kincare/core/errors/app_exception.dart';
+import 'package:kincare/core/network/network_info.dart';
 import 'package:kincare/domain/entities/child_entity.dart';
 import 'package:kincare/domain/entities/medication_entity.dart';
 import 'package:kincare/domain/usecases/get_children_usecase.dart';
@@ -17,11 +20,13 @@ class MedicationController extends GetxController {
     required UpdateMedicationUseCase updateMedicationUseCase,
     required DeleteMedicationUseCase deleteMedicationUseCase,
     required GetChildrenUseCase getChildrenUseCase,
+    required NetworkInfo networkInfo,
   }) : _getMedicationsUseCase = getMedicationsUseCase,
        _createMedicationUseCase = createMedicationUseCase,
        _updateMedicationUseCase = updateMedicationUseCase,
        _deleteMedicationUseCase = deleteMedicationUseCase,
-       _getChildrenUseCase = getChildrenUseCase;
+       _getChildrenUseCase = getChildrenUseCase,
+       _networkInfo = networkInfo;
 
   /// Preset options shown in the medication frequency dropdown.
   static const List<String> frequencyOptions = [
@@ -40,6 +45,8 @@ class MedicationController extends GetxController {
   final UpdateMedicationUseCase _updateMedicationUseCase;
   final DeleteMedicationUseCase _deleteMedicationUseCase;
   final GetChildrenUseCase _getChildrenUseCase;
+  final NetworkInfo _networkInfo;
+  StreamSubscription<bool>? _connectivitySubscription;
 
   final nameController = TextEditingController();
   final dosageController = TextEditingController();
@@ -61,10 +68,22 @@ class MedicationController extends GetxController {
     super.onInit();
     loadMedications();
     loadChildren();
+    // The children list (and medications) can fail to load while offline.
+    // Retry as soon as connectivity is restored so the child picker
+    // dropdown doesn't stay stuck empty/stale after a reconnect.
+    _connectivitySubscription = _networkInfo.onConnectivityChanged.listen((
+      isConnected,
+    ) {
+      if (isConnected) {
+        loadChildren();
+        loadMedications();
+      }
+    });
   }
 
   @override
   void onClose() {
+    _connectivitySubscription?.cancel();
     nameController.dispose();
     dosageController.dispose();
     notesController.dispose();

@@ -45,6 +45,7 @@ class MedicationBinding extends Bindings {
         updateMedicationUseCase: Get.find(),
         deleteMedicationUseCase: Get.find(),
         getChildrenUseCase: Get.find(),
+        networkInfo: Get.find(),
       ),
     );
   }

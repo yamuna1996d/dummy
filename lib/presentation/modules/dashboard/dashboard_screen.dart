@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kincare/app/constants/app_dimensions.dart';
+import 'package:kincare/app/constants/app_strings.dart';
 import 'package:kincare/app/routes/app_routes.dart';
 import 'package:kincare/app/theme/app_colors.dart';
 import 'package:kincare/core/accessibility/responsive_helper.dart';
-import 'package:kincare/core/widgets/error_view.dart';
-import 'package:kincare/core/widgets/initials_avatar.dart';
-import 'package:kincare/core/widgets/loading_view.dart';
-import 'package:kincare/core/widgets/section_label.dart';
 import 'package:kincare/domain/entities/dashboard_entity.dart';
 import 'package:kincare/presentation/controllers/dashboard_controller.dart';
 import 'package:kincare/presentation/widgets/app_drawer.dart';
 import 'package:kincare/presentation/widgets/kincare_app_bar.dart';
+
+import '../../widgets/error_view.dart';
+import '../../widgets/initials_avatar.dart';
+import '../../widgets/loading_view.dart';
+import '../../widgets/section_label.dart';
 
 /// DASHBOARD SCREEN
 ///
@@ -70,7 +72,7 @@ class _DashboardBody extends StatelessWidget {
           Semantics(
             headingLevel: 1,
             child: Text(
-              'Hello, John',
+              AppStrings.helloGreeting('John'),
               style: theme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -97,15 +99,16 @@ class _DashboardBody extends StatelessWidget {
               // separately as four disconnected fragments.
               return Semantics(
                 headingLevel: 2,
-                label:
-                    'Today at a glance: $childCount children under care, '
-                    '$medCount medication doses due, '
-                    '$visitCount upcoming visit${visitCount == '1' ? '' : 's'}',
+                label: AppStrings.glanceSummary(
+                  childCount,
+                  medCount,
+                  visitCount,
+                ),
                 excludeSemantics: true,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SectionLabel('TODAY AT A GLANCE'),
+                    const SectionLabel(AppStrings.todayAtAGlance),
                     const SizedBox(height: AppDimensions.spacingMd),
                     _GlanceCards(
                       childCount: childCount,
@@ -121,7 +124,7 @@ class _DashboardBody extends StatelessWidget {
 
           // Section: YOUR CHILDREN
           SectionLabel(
-            'YOUR CHILDREN',
+            AppStrings.yourChildrenSection,
             trailing: FocusTraversalGroup(
               policy: OrderedTraversalPolicy(),
               child: Row(
@@ -130,12 +133,14 @@ class _DashboardBody extends StatelessWidget {
                     order: const NumericFocusOrder(1),
                     child: Semantics(
                       button: true,
-                      label: 'View all children',
+                      label: AppStrings.viewAllChildren,
                       excludeSemantics: true,
                       onTap: () => Get.toNamed(AppRoutes.children),
-                      child: TextButton(
+                      child: TextButton.icon(
                         onPressed: () => Get.toNamed(AppRoutes.children),
-                        child: Text('View all'),
+                        label: const Text(AppStrings.viewAll),
+                        icon: const Icon(Icons.arrow_forward_ios, size: 14),
+                        iconAlignment: IconAlignment.end,
                       ),
                     ),
                   ),
@@ -150,23 +155,21 @@ class _DashboardBody extends StatelessWidget {
           // iterate over the guardian's actual children.
           _ChildPreviewCard(
             name: 'Riya Menon',
-            age: '6 yrs',
-            status: 'All clear today',
-            color: AppColors.chipGreen,
+            age: '6 ${AppStrings.yrs}',
+            status: AppStrings.allClearToday,
             onTap: () => Get.toNamed(AppRoutes.childDetails, arguments: '1'),
           ),
           const SizedBox(height: AppDimensions.spacingSm),
           _ChildPreviewCard(
             name: 'Aarav Menon',
-            age: '3 yrs',
-            status: '1 dose remaining',
-            color: AppColors.chipAmber,
+            age: '3 ${AppStrings.yrs}',
+            status: AppStrings.doseRemaining,
             onTap: () => Get.toNamed(AppRoutes.childDetails, arguments: '2'),
           ),
           const SizedBox(height: AppDimensions.spacingXl),
 
           // Section: UPCOMING VISIT
-          const SectionLabel('UPCOMING VISIT'),
+          const SectionLabel(AppStrings.upcomingVisitSection),
           const SizedBox(height: AppDimensions.spacingMd),
           _UpcomingVisitCard(dashboard: dashboard),
           const SizedBox(height: AppDimensions.spacingXxl),
@@ -197,7 +200,7 @@ class _GlanceCards extends StatelessWidget {
               child: _GlanceCard(
                 icon: Icons.sentiment_satisfied_alt,
                 value: childCount,
-                label: 'Children under care',
+                label: AppStrings.childrenUnderCare,
                 backgroundColor: Colors.white,
                 iconColor: AppColors.primaryLight,
                 textColor: AppColors.onSurfaceLight,
@@ -208,7 +211,7 @@ class _GlanceCards extends StatelessWidget {
               child: _GlanceCard(
                 icon: Icons.medication_outlined,
                 value: medCount,
-                label: 'Medication doses due',
+                label: AppStrings.medicationDosesDue,
                 backgroundColor: AppColors.primaryLight,
                 iconColor: Colors.white,
                 textColor: Colors.white,
@@ -224,7 +227,7 @@ class _GlanceCards extends StatelessWidget {
             child: _GlanceCard(
               icon: Icons.calendar_today_outlined,
               value: visitCount,
-              label: 'Upcoming visit',
+              label: AppStrings.upcomingVisit,
               // White-on-amber fails WCAG contrast (~2.1:1); the dark
               // surface color reads clearly against this background.
               backgroundColor: AppColors.secondaryLight,
@@ -301,54 +304,52 @@ class _ChildPreviewCard extends StatelessWidget {
     required this.name,
     required this.age,
     required this.status,
-    required this.color,
     required this.onTap,
   });
 
   final String name;
   final String age;
   final String status;
-  final Color color;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Reads as "Selected child: <name>, age <age>, medication: <status>"
-    // instead of the terser "<name>, <age>, <status>" — spelling out what
-    // each value means rather than leaving a screen-reader user to infer
-    // it from three bare fragments.
     return Semantics(
       button: true,
-      label: 'Selected child: $name, age $age, medication: $status',
-      hint: "Opens $name's profile",
+      label: AppStrings.selectedChildLabel(name, age, status),
+      hint: AppStrings.opensProfileHint(name),
       excludeSemantics: true,
       onTap: onTap,
       child: Card(
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.paddingMd,
-            vertical: AppDimensions.paddingXs,
-          ),
-          leading: InitialsAvatar(name: name, radius: 22, fontSize: 16),
-          title: Text(
-            name,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
+        clipBehavior: Clip.antiAlias,
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.paddingMd,
+              vertical: AppDimensions.paddingXs,
             ),
-          ),
-          subtitle: Text(
-            '$age • $status',
-            style: theme.textTheme.bodySmall?.copyWith(
+            leading: InitialsAvatar(name: name, radius: 22, fontSize: 16),
+            title: Text(
+              name,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            subtitle: Text(
+              '$age • $status',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            trailing: Icon(
+              Icons.chevron_right,
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          trailing: Icon(
-            Icons.chevron_right,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-          onTap: onTap,
         ),
       ),
     );
@@ -378,9 +379,9 @@ class _UpcomingVisitCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(AppDimensions.paddingMd),
           child: Semantics(
-            label: 'Upcoming visit: no upcoming visits scheduled',
+            label: AppStrings.noUpcomingVisitsLabel,
             excludeSemantics: true,
-            child: const Text('No upcoming visits'),
+            child: const Text(AppStrings.noUpcomingVisits),
           ),
         ),
       );
@@ -391,15 +392,6 @@ class _UpcomingVisitCard extends StatelessWidget {
       ?time,
     ].join(' at ');
 
-    // One combined announcement — "Upcoming visit for <child>: <title> on
-    // <date>, at <location>" — instead of the date chip, title, and
-    // location reading as three unrelated, disconnected stops. Without
-    // this, a screen-reader user hears fragments with no indication
-    // they belong to the same appointment.
-    final visitLabel = StringBuffer('Upcoming visit for $childName: $title');
-    if (dateLabel.isNotEmpty) visitLabel.write(', $dateLabel');
-    if (location != null) visitLabel.write(', at $location');
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppDimensions.paddingMd),
@@ -407,7 +399,12 @@ class _UpcomingVisitCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Semantics(
-              label: visitLabel.toString(),
+              label: AppStrings.upcomingVisitLabel(
+                childName: childName,
+                title: title,
+                dateLabel: dateLabel.isNotEmpty ? dateLabel : null,
+                location: location,
+              ),
               excludeSemantics: true,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -461,66 +458,71 @@ class _UpcomingVisitCard extends StatelessWidget {
             const SizedBox(height: AppDimensions.spacingMd),
             FocusTraversalGroup(
               policy: OrderedTraversalPolicy(),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: FocusTraversalOrder(
-                      order: const NumericFocusOrder(0),
-                      child: Semantics(
-                        button: true,
-                        label: 'View details',
-                        hint: "Opens this child's profile",
-                        enabled: childId != null,
-                        excludeSemantics: true,
-                        onTap: childId == null
-                            ? null
-                            : () => Get.toNamed(
-                                AppRoutes.childDetails,
-                                arguments: childId,
-                              ),
-                        child: OutlinedButton(
-                          onPressed: childId == null
+              child: IntrinsicHeight(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: FocusTraversalOrder(
+                        order: const NumericFocusOrder(0),
+                        child: Semantics(
+                          button: true,
+                          label: AppStrings.viewDetails,
+                          hint: AppStrings.opensChildProfileHint,
+                          enabled: childId != null,
+                          excludeSemantics: true,
+                          onTap: childId == null
                               ? null
                               : () => Get.toNamed(
-                                  AppRoutes.childDetails,
-                                  arguments: childId,
-                                ),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: theme.colorScheme.outlineVariant,
+                            AppRoutes.childDetails,
+                            arguments: childId,
+                          ),
+                          child: OutlinedButton(
+                            onPressed: childId == null
+                                ? null
+                                : () => Get.toNamed(
+                              AppRoutes.childDetails,
+                              arguments: childId,
                             ),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: theme.colorScheme.outlineVariant,
+                              ),
+                            ),
+                            child: const Text(AppStrings.details),
                           ),
-                          child: const Text('Details'),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: AppDimensions.spacingSm),
-                  Expanded(
-                    child: FocusTraversalOrder(
-                      order: const NumericFocusOrder(1),
-                      child: Semantics(
-                        button: true,
-                        label: 'Get directions to $location',
-                        excludeSemantics: true,
-                        onTap: () => Get.snackbar(
-                          'Get Directions',
-                          location ?? 'Location not available',
-                        ),
-                        child: ElevatedButton(
-                          onPressed: () => Get.snackbar(
-                            'Get Directions',
-                            location ?? 'Location not available',
+                    const SizedBox(width: AppDimensions.spacingSm),
+                    Expanded(
+                      child: FocusTraversalOrder(
+                        order: const NumericFocusOrder(1),
+                        child: Semantics(
+                          button: true,
+                          label: AppStrings.directionsToLabel(location),
+                          excludeSemantics: true,
+                          onTap: () => Get.snackbar(
+                            AppStrings.getDirections,
+                            location ?? AppStrings.locationNotAvailable,
                           ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: theme.colorScheme.error,
+                          child: ElevatedButton(
+                            onPressed: () => Get.snackbar(
+                              AppStrings.getDirections,
+                              location ?? AppStrings.locationNotAvailable,
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: theme.colorScheme.error,
+                              foregroundColor: theme.colorScheme.onError,
+                              elevation: 0,
+                              side: BorderSide.none,
+                            ),
+                            child: const Text(AppStrings.getDirections),
                           ),
-                          child: const Text('Get Directions'),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

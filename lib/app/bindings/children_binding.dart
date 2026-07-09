@@ -23,6 +23,7 @@ class ChildrenBinding extends Bindings {
       () => ChildrenController(
         getChildrenUseCase: Get.find(),
         getChildDetailsUseCase: Get.find(),
+        networkInfo: Get.find(),
       ),
     );
   }

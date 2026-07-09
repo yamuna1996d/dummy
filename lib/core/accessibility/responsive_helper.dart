@@ -14,24 +14,12 @@ abstract final class ResponsiveHelper {
     return DeviceType.mobile;
   }
 
-  /// Returns true if the device is in landscape orientation.
-  static bool isLandscape(BuildContext context) {
-    return MediaQuery.orientationOf(context) == Orientation.landscape;
-  }
-
   /// Returns true for tablet or larger screens.
   static bool isTabletOrLarger(BuildContext context) {
     return MediaQuery.sizeOf(context).width >= AppDimensions.tabletBreakpoint;
   }
 
-  /// Returns the number of grid columns appropriate for the screen size.
-  static int gridColumns(BuildContext context) {
-    return switch (deviceType(context)) {
-      DeviceType.mobile => isLandscape(context) ? 2 : 1,
-      DeviceType.tablet => isLandscape(context) ? 3 : 2,
-      DeviceType.desktop => 3,
-    };
-  }
+
 
   /// Returns horizontal padding appropriate for the screen size.
   static double horizontalPadding(BuildContext context) {
@@ -40,11 +28,5 @@ abstract final class ResponsiveHelper {
       DeviceType.tablet => AppDimensions.paddingLg,
       DeviceType.desktop => AppDimensions.paddingXl,
     };
-  }
-
-  /// Returns the text scale factor clamped to accessibility-safe bounds.
-  static double clampedTextScale(BuildContext context) {
-    final scale = MediaQuery.textScalerOf(context).scale(1.0);
-    return scale.clamp(0.8, 2.0);
   }
 }

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kincare/app/constants/app_dimensions.dart';
 import 'package:kincare/app/constants/app_strings.dart';
-import 'package:kincare/core/widgets/app_snackbar.dart';
-import 'package:kincare/core/widgets/form_screen_scaffold.dart';
-import 'package:kincare/core/widgets/primary_button.dart';
-import 'package:kincare/core/widgets/unsaved_changes_scope.dart';
 import 'package:kincare/domain/entities/medication_entity.dart';
 import 'package:kincare/presentation/controllers/medication_controller.dart';
 import 'package:kincare/presentation/modules/medication/medication_form_fields.dart';
+import '../../widgets/app_snackbar.dart';
+import '../../widgets/form_screen_scaffold.dart';
+import '../../widgets/primary_button.dart';
+import '../../widgets/unsaved_changes_scope.dart';
 
 /// ADD MEDICATION SCREEN
 ///
@@ -53,10 +53,10 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   // leave without a "Discard changes?" prompt.
   bool get _hasUnsavedChanges =>
       controller.nameController.text.trim().isNotEmpty ||
-      controller.dosageController.text.trim().isNotEmpty ||
-      controller.notesController.text.trim().isNotEmpty ||
-      controller.selectedChildId.value != _initialChildId ||
-      controller.selectedFrequency.value != null;
+          controller.dosageController.text.trim().isNotEmpty ||
+          controller.notesController.text.trim().isNotEmpty ||
+          controller.selectedChildId.value != _initialChildId ||
+          controller.selectedFrequency.value != null;
 
   @override
   Widget build(BuildContext context) {
@@ -72,10 +72,10 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
           MedicationFormFields(controller: controller, autofocusName: true),
           const SizedBox(height: AppDimensions.spacingXl),
           Obx(
-            () => PrimaryButton(
-              label: 'Save medication',
+                () => PrimaryButton(
+              label: AppStrings.saveMedication,
               isLoading: controller.isSaving.value,
-              semanticLabel: 'Save medication',
+              semanticLabel: AppStrings.saveMedication,
               onPressed: _save,
             ),
           ),
@@ -103,7 +103,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     final success = await controller.createMedication(medication);
     if (success) {
       Get.back();
-      AppSnackbar.success('Medication added successfully');
+      AppSnackbar.success(AppStrings.medicationAddedSuccess);
     }
   }
 }

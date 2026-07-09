@@ -14,6 +14,7 @@ void main() {
   late MockUpdateMedicationUseCase updateMedicationUseCase;
   late MockDeleteMedicationUseCase deleteMedicationUseCase;
   late MockGetChildrenUseCase getChildrenUseCase;
+  late MockNetworkInfo networkInfo;
   late MedicationController controller;
 
   const medA = MedicationEntity(id: '1', name: 'Amoxicillin', childId: 'c1');
@@ -25,10 +26,14 @@ void main() {
     updateMedicationUseCase = MockUpdateMedicationUseCase();
     deleteMedicationUseCase = MockDeleteMedicationUseCase();
     getChildrenUseCase = MockGetChildrenUseCase();
+    networkInfo = MockNetworkInfo();
 
     when(
       getChildrenUseCase(),
     ).thenAnswer((_) async => const Result.success(<ChildEntity>[]));
+    when(
+      networkInfo.onConnectivityChanged,
+    ).thenAnswer((_) => const Stream.empty());
 
     controller = MedicationController(
       getMedicationsUseCase: getMedicationsUseCase,
@@ -36,6 +41,7 @@ void main() {
       updateMedicationUseCase: updateMedicationUseCase,
       deleteMedicationUseCase: deleteMedicationUseCase,
       getChildrenUseCase: getChildrenUseCase,
+      networkInfo: networkInfo,
     );
   });
 

@@ -21,15 +21,13 @@ class ChildrenRemoteDatasource {
     );
 
     return result.when(
-      success: (data) {
-        final children = data['children']?['data'] as List<dynamic>?;
+      success: (response) {
+        final children = response.connectionItems('children');
         if (children == null) {
           return const Result.failure(ParsingException());
         }
         return Result.success(
-          children
-              .map((e) => ChildModel.fromGraphQL(e as Map<String, dynamic>))
-              .toList(),
+          children.map((e) => ChildModel.fromGraphQL(e)).toList(),
         );
       },
       failure: (e) => Result.failure(e),
@@ -43,8 +41,8 @@ class ChildrenRemoteDatasource {
     );
 
     return result.when(
-      success: (data) {
-        final child = data['child'] as Map<String, dynamic>?;
+      success: (response) {
+        final child = response.object('child');
         if (child == null) {
           return const Result.failure(ParsingException());
         }
@@ -69,8 +67,8 @@ class ChildrenRemoteDatasource {
     );
 
     return result.when(
-      success: (data) {
-        final created = data['createChild'] as Map<String, dynamic>?;
+      success: (response) {
+        final created = response.object('createChild');
         if (created == null) {
           return const Result.failure(ParsingException());
         }
@@ -96,8 +94,8 @@ class ChildrenRemoteDatasource {
     );
 
     return result.when(
-      success: (data) {
-        final updated = data['updateChild'] as Map<String, dynamic>?;
+      success: (response) {
+        final updated = response.object('updateChild');
         if (updated == null) {
           return const Result.failure(ParsingException());
         }
