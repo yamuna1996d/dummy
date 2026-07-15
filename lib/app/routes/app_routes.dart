@@ -8,6 +8,10 @@ abstract final class AppRoutes {
   static const String medications = '/medications';
   static const String addMedication = '/medications/add';
   static const String editMedication = '/medications/edit';
+  static const String visits = '/visits';
+  static const String addVisit = '/visits/add';
+  static const String editVisit = '/visits/edit';
+  static const String visitDetails = '/visits/details';
   static const String profile = '/profile';
   static const String help = '/help';
   static const String about = '/about';

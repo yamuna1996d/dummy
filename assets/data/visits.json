@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1",
+    "childId": "1",
+    "visitType": "Medical",
+    "visitDate": "2024-03-30T00:00:00.000Z",
+    "purpose": "Follow up- PCP One",
+    "physician": "Dr. Sarah Williams",
+    "hospital": "Collage",
+    "comment": "Test",
+    "documents": [
+      {"id": "1", "fileName": "Final contact.docx", "fileSizeBytes": 6291456},
+      {"id": "2", "fileName": "Final contact.docx", "fileSizeBytes": 6291456}
+    ]
+  }
+]

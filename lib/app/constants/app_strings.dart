@@ -303,6 +303,63 @@ abstract final class AppStrings {
           'child name is $childName, '
           'dosage ${frequency ?? notSpecified}, ';
 
+  // Visits
+  static const String visits = 'Visits';
+  static const String addVisit = 'Add Visit';
+  static const String editVisit = 'Edit Visit';
+  static const String deleteVisit = 'Delete Visit';
+  static const String visitDetails = 'Visit Details';
+  static const String visitType = 'Visit Type';
+  static const String selectVisitType = 'Select visit type';
+  static const String visitDate = 'Visit Date';
+  static const String selectVisitDate = 'Select a date';
+  static const String purpose = 'Purpose';
+  static const String purposeHint = 'e.g. Follow up - PCP One';
+  static const String physicianTreatmentProvider = 'Physician/Treatment Provider';
+  static const String physicianHint = 'e.g. Dr. Sarah Williams';
+  static const String hospitalFacility = 'Hospital / Facility';
+  static const String hospitalHint = 'e.g. City General Hospital';
+  static const String comment = 'Comment';
+  static const String commentOptional = 'Comment';
+  static const String enterComment = 'Enter comment...';
+  static const String visitSummary = 'Visit Summary';
+  static const String documents = 'Documents';
+  static const String chooseFile = 'Choose file';
+  static const String toUpload = ' to Upload';
+  static const String supportedFiles = 'Supported files: PDF, DOC, DOCX';
+  static const String maxFileSize = 'Maximum size 12 MB';
+  static const String uploadFailed = 'Upload failed';
+  static const String noDocumentsUploaded = 'No documents uploaded yet';
+  static const String noVisits = 'No visits added yet';
+  static const String asOf = 'as of';
+  static const String visitAddedSuccess = 'Visit added successfully';
+  static const String visitUpdatedSuccess = 'Visit updated successfully';
+  static const String deleteDocument = 'Delete document';
+  static const String deleteDocumentConfirmation =
+      'Are you sure you want to delete this document?';
+  static const String retryUpload = 'Retry upload';
+  static const String unsupportedFileType =
+      'Unsupported file type. Please choose a PDF, DOC, or DOCX file.';
+  static const String fileTooLarge = 'File exceeds the 12 MB size limit.';
+  static const String visitTypeRequired = 'Visit type is required';
+  static const String purposeRequired = 'Purpose is required';
+
+  static String childVisitsTitle(String childName) => "$childName's Visits";
+
+  static String noVisitsForChild(String childName) =>
+      'No visits for $childName yet';
+
+  static String downloadDocumentLabel(String fileName) =>
+      'Download $fileName';
+
+  static String deleteDocumentLabel(String fileName) => 'Delete $fileName';
+
+  static String uploadProgressLabel(String fileName, int percent) =>
+      'Uploading $fileName, $percent percent complete';
+
+  static String uploadFailedLabel(String fileName) =>
+      'Upload failed for $fileName';
+
   // Profile
   static const String profile = 'Profile';
   static const String name = 'Name';

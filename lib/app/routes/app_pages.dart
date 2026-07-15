@@ -3,6 +3,7 @@ import 'package:kincare/app/bindings/dashboard_binding.dart';
 import 'package:kincare/app/bindings/children_binding.dart';
 import 'package:kincare/app/bindings/medication_binding.dart';
 import 'package:kincare/app/bindings/profile_binding.dart';
+import 'package:kincare/app/bindings/visit_binding.dart';
 import 'package:kincare/presentation/modules/auth/login_screen.dart';
 import 'package:kincare/presentation/modules/dashboard/dashboard_screen.dart';
 import 'package:kincare/presentation/modules/children/children_list_screen.dart';
@@ -11,6 +12,10 @@ import 'package:kincare/presentation/modules/children/add_child_screen.dart';
 import 'package:kincare/presentation/modules/medication/medication_list_screen.dart';
 import 'package:kincare/presentation/modules/medication/add_medication_screen.dart';
 import 'package:kincare/presentation/modules/medication/edit_medication_screen.dart';
+import 'package:kincare/presentation/modules/visits/visit_list_screen.dart';
+import 'package:kincare/presentation/modules/visits/add_visit_screen.dart';
+import 'package:kincare/presentation/modules/visits/edit_visit_screen.dart';
+import 'package:kincare/presentation/modules/visits/visit_details_screen.dart';
 import 'package:kincare/presentation/modules/profile/profile_screen.dart';
 import 'package:kincare/presentation/modules/help/help_screen.dart';
 import 'package:kincare/presentation/modules/about/about_screen.dart';
@@ -27,8 +32,10 @@ import 'app_routes.dart';
 /// permanently in [InitialBinding] so it survives across all routes (the
 /// navigation drawer's logout button calls it from every screen).
 ///
-/// Child Profile uses BOTH [ChildrenBinding] and [MedicationBinding] because
-/// the profile body reads active medications from [MedicationController].
+/// Child Profile uses [ChildrenBinding], [MedicationBinding], and
+/// [VisitBinding] together because the profile body reads active
+/// medications from [MedicationController] and recent visits from
+/// [VisitController].
 abstract final class AppPages {
   static final pages = <GetPage>[
     GetPage(
@@ -52,9 +59,10 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.childDetails,
       page: () => const ChildDetailsScreen(),
-      // Two bindings: ChildrenController (loads the child record) and
-      // MedicationController (supplies the active medications section).
-      bindings: [ChildrenBinding(), MedicationBinding()],
+      // Three bindings: ChildrenController (loads the child record),
+      // MedicationController (supplies the active medications section),
+      // and VisitController (supplies the visits section).
+      bindings: [ChildrenBinding(), MedicationBinding(), VisitBinding()],
       transition: Transition.rightToLeft,
     ),
     GetPage(
@@ -79,6 +87,29 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.editMedication,
       page: () => const EditMedicationScreen(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.visits,
+      page: () => const VisitListScreen(),
+      binding: VisitBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.addVisit,
+      page: () => const AddVisitScreen(),
+      // VisitController is already on the stack (registered by the route
+      // that opened this screen), so no additional binding is needed.
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.editVisit,
+      page: () => const EditVisitScreen(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.visitDetails,
+      page: () => const VisitDetailsScreen(),
       transition: Transition.rightToLeft,
     ),
     GetPage(

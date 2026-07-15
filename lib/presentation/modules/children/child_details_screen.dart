@@ -7,8 +7,10 @@ import 'package:kincare/app/theme/app_colors.dart';
 import 'package:kincare/core/accessibility/responsive_helper.dart';
 import 'package:kincare/domain/entities/child_entity.dart';
 import 'package:kincare/domain/entities/medication_entity.dart';
+import 'package:kincare/domain/entities/visit_entity.dart';
 import 'package:kincare/presentation/controllers/children_controller.dart';
 import 'package:kincare/presentation/controllers/medication_controller.dart';
+import 'package:kincare/presentation/controllers/visit_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../widgets/error_view.dart';
@@ -58,6 +60,7 @@ class ChildDetailsScreen extends StatelessWidget {
     final childId = Get.arguments as String?;
     final childrenController = Get.find<ChildrenController>();
     final medicationController = Get.find<MedicationController>();
+    final visitController = Get.find<VisitController>();
 
     if (childId == null) {
       return Scaffold(
@@ -98,6 +101,7 @@ class ChildDetailsScreen extends StatelessWidget {
         return _ChildProfileBody(
           child: child,
           medicationController: medicationController,
+          visitController: visitController,
         );
       }),
     );
@@ -108,10 +112,12 @@ class _ChildProfileBody extends StatelessWidget {
   const _ChildProfileBody({
     required this.child,
     required this.medicationController,
+    required this.visitController,
   });
 
   final ChildEntity child;
   final MedicationController medicationController;
+  final VisitController visitController;
 
   @override
   Widget build(BuildContext context) {
@@ -203,6 +209,67 @@ class _ChildProfileBody extends StatelessWidget {
                 return Column(
                   children: activeMedications
                       .map((m) => _MedicationCard(medication: m))
+                      .toList(),
+                );
+              }),
+              const SizedBox(height: AppDimensions.spacingLg),
+              SectionLabel(
+                AppStrings.visits,
+                trailing: Semantics(
+                  button: true,
+                  label: AppStrings.viewAll,
+                  excludeSemantics: true,
+                  onTap: () => Get.toNamed(
+                    AppRoutes.visits,
+                    arguments: {'childId': child.id, 'childName': child.name},
+                  ),
+                  child: TextButton.icon(
+                    onPressed: () => Get.toNamed(
+                      AppRoutes.visits,
+                      arguments: {'childId': child.id, 'childName': child.name},
+                    ),
+                    label: Text(
+                      AppStrings.viewAll,
+                      style: TextStyle(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    icon: Icon(Icons.arrow_forward_ios, size: 16, color: theme.colorScheme.primary),
+                    iconAlignment: IconAlignment.end,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppDimensions.spacingSm),
+              Obx(() {
+                if (visitController.isLoading.value) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: AppDimensions.paddingLg,
+                    ),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                final childVisits = visitController.visits
+                    .where((v) => v.childId == child.id)
+                    .toList();
+                if (childVisits.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppDimensions.paddingMd,
+                    ),
+                    child: Text(
+                      AppStrings.noVisitsForChild(child.name),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  );
+                }
+                return Column(
+                  children: childVisits
+                      .take(2)
+                      .map((v) => _VisitSummaryCard(visit: v))
                       .toList(),
                 );
               }),
@@ -445,6 +512,73 @@ class _AllergyBanner extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _VisitSummaryCard extends StatelessWidget {
+  const _VisitSummaryCard({required this.visit});
+  final VisitEntity visit;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Semantics(
+      button: true,
+      label: '${visit.visitType}${visit.purpose != null ? ", ${visit.purpose}" : ""}',
+      excludeSemantics: true,
+      onTap: () => Get.toNamed(AppRoutes.visitDetails, arguments: visit.id),
+      child: Card(
+        child: InkWell(
+          onTap: () => Get.toNamed(AppRoutes.visitDetails, arguments: visit.id),
+          child: Padding(
+            padding: const EdgeInsets.all(AppDimensions.paddingMd),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.chipTeal,
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+                  ),
+                  child: const Icon(
+                    Icons.event_note_outlined,
+                    color: AppColors.primaryLight,
+                  ),
+                ),
+                const SizedBox(width: AppDimensions.spacingMd),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        visit.purpose ?? visit.visitType,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        visit.visitType,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

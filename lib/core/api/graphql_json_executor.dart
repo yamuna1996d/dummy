@@ -25,6 +25,7 @@ class GraphQLJsonExecutor {
 
   List<Map<String, dynamic>>? _children;
   List<Map<String, dynamic>>? _medications;
+  List<Map<String, dynamic>>? _visits;
   Map<String, dynamic>? _profile;
 
   // Convenience accessor — storage is registered permanently in main() before
@@ -34,7 +35,12 @@ class GraphQLJsonExecutor {
   // ── Load helpers ────────────────────────────────────────────────────────────
 
   Future<void> _ensureLoaded() async {
-    if (_children != null && _medications != null && _profile != null) return;
+    if (_children != null &&
+        _medications != null &&
+        _visits != null &&
+        _profile != null) {
+      return;
+    }
     _medications =
         await _loadOrSeed(
               HiveKeys.cachedMedications,
@@ -46,6 +52,13 @@ class GraphQLJsonExecutor {
         await _loadOrSeed(
               HiveKeys.cachedChildren,
               'assets/data/children.json',
+              isList: true,
+            )
+            as List<Map<String, dynamic>>;
+    _visits =
+        await _loadOrSeed(
+              HiveKeys.cachedVisits,
+              'assets/data/visits.json',
               isList: true,
             )
             as List<Map<String, dynamic>>;
@@ -99,6 +112,9 @@ class GraphQLJsonExecutor {
     HiveKeys.cachedChildren,
     jsonEncode(_children),
   );
+
+  Future<void> _saveVisits() async =>
+      _storage.put(HiveKeys.dataBox, HiveKeys.cachedVisits, jsonEncode(_visits));
 
   // ── Public API ───────────────────────────────────────────────────────────────
 
@@ -156,6 +172,29 @@ class GraphQLJsonExecutor {
       final result = _delete(_medications!, variables['id']);
       await _saveMedications();
       return {'deleteMedication': result};
+    }
+
+    // ── Visits ────────────────────────────────────────────────────────────────
+    if (document == GraphQLQueries.getVisits) {
+      return {'visits': _paginate(_visits!, variables)};
+    }
+    if (document == GraphQLQueries.getVisit) {
+      return {'visit': _findById(_visits!, variables['id'])};
+    }
+    if (document == GraphQLQueries.createVisit) {
+      final created = _create(_visits!, variables);
+      await _saveVisits();
+      return {'createVisit': created};
+    }
+    if (document == GraphQLQueries.updateVisit) {
+      final updated = _update(_visits!, variables);
+      await _saveVisits();
+      return {'updateVisit': updated};
+    }
+    if (document == GraphQLQueries.deleteVisit) {
+      final result = _delete(_visits!, variables['id']);
+      await _saveVisits();
+      return {'deleteVisit': result};
     }
 
     throw UnsupportedError('Unknown GraphQL document: $document');

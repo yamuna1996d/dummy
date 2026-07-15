@@ -19,4 +19,5 @@ abstract final class HiveKeys {
   static const String cachedMedications = 'medications';
   static const String cachedChildren = 'children';
   static const String cachedProfile = 'profile';
+  static const String cachedVisits = 'visits';
 }

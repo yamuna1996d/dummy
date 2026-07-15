@@ -182,4 +182,96 @@ abstract final class GraphQLQueries {
       deleteMedication(id: $id)
     }
   ''';
+
+  // Visits
+  static const String getVisits = r'''
+    query GetVisits($options: PageQueryOptions) {
+      visits(options: $options) {
+        data {
+          id
+          childId
+          visitType
+          visitDate
+          purpose
+          physician
+          hospital
+          comment
+          documents {
+            id
+            fileName
+            fileSizeBytes
+          }
+        }
+        meta {
+          totalCount
+        }
+      }
+    }
+  ''';
+
+  static const String getVisit = r'''
+    query GetVisit($id: ID!) {
+      visit(id: $id) {
+        id
+        childId
+        visitType
+        visitDate
+        purpose
+        physician
+        hospital
+        comment
+        documents {
+          id
+          fileName
+          fileSizeBytes
+        }
+      }
+    }
+  ''';
+
+  static const String createVisit = r'''
+    mutation CreateVisit($input: CreateVisitInput!) {
+      createVisit(input: $input) {
+        id
+        childId
+        visitType
+        visitDate
+        purpose
+        physician
+        hospital
+        comment
+        documents {
+          id
+          fileName
+          fileSizeBytes
+        }
+      }
+    }
+  ''';
+
+  static const String updateVisit = r'''
+    mutation UpdateVisit($id: ID!, $input: UpdateVisitInput!) {
+      updateVisit(id: $id, input: $input) {
+        id
+        childId
+        visitType
+        visitDate
+        purpose
+        physician
+        hospital
+        comment
+        documents {
+          id
+          fileName
+          fileSizeBytes
+        }
+      }
+    }
+  ''';
+
+  static const String deleteVisit = r'''
+    mutation DeleteVisit($id: ID!) {
+      deleteVisit(id: $id)
+    }
+  ''';
 }
